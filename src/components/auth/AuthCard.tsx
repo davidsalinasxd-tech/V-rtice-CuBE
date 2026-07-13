@@ -17,6 +17,8 @@ export function AuthCard() {
   const [mostrarReenviar, setMostrarReenviar] = useState(false);
   const [emailPendiente, setEmailPendiente] = useState<string | null>(null);
   const [reenviado, setReenviado] = useState(false);
+  const [recuperar, setRecuperar] = useState(false);
+  const [resetEnviado, setResetEnviado] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -31,7 +33,7 @@ export function AuthCard() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { nombre, rol } },
+      options: { data: { nombre, rol }, emailRedirectTo: `${window.location.origin}/cuenta-confirmada` },
     });
 
     if (error) {
@@ -87,13 +89,96 @@ export function AuthCard() {
   async function handleReenviar() {
     if (!emailPendiente) return;
     setLoading(true);
-    const { error } = await supabase.auth.resend({ type: "signup", email: emailPendiente });
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: emailPendiente,
+      options: { emailRedirectTo: `${window.location.origin}/cuenta-confirmada` },
+    });
     setLoading(false);
     if (error) {
       setError(error.message);
       return;
     }
     setReenviado(true);
+  }
+
+  async function handleRecuperar(formData: FormData) {
+    setLoading(true);
+    setError(null);
+
+    const email = String(formData.get("email3") ?? "");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/restablecer-contrasena`,
+    });
+
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setResetEnviado(email);
+  }
+
+  if (resetEnviado) {
+    return (
+      <div className="w-full max-w-105 rounded-lg border border-line bg-white p-9 text-center shadow-[0_24px_48px_rgba(0,47,89,0.1)]">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-orange/10 text-2xl">
+          🔑
+        </div>
+        <h1 className="font-display mb-2 text-xl text-ink">Revisá tu correo</h1>
+        <p className="mb-1 text-[13px] leading-relaxed text-text-dim">Te mandamos un link para elegir una nueva contraseña a</p>
+        <p className="mb-5 text-sm font-semibold text-navy">{resetEnviado}</p>
+        <p className="mb-6 text-[13px] leading-relaxed text-text-dim">
+          Si no te llega en unos minutos, revisá spam o volvé a intentar.
+        </p>
+        <button
+          onClick={() => {
+            setResetEnviado(null);
+            setRecuperar(false);
+            setTab("entrar");
+          }}
+          className="block w-full cursor-pointer text-[13px] text-text-dim hover:text-navy"
+        >
+          Volver a iniciar sesión →
+        </button>
+      </div>
+    );
+  }
+
+  if (recuperar) {
+    return (
+      <div className="w-full max-w-105 rounded-lg border border-line bg-white p-9 shadow-[0_24px_48px_rgba(0,47,89,0.1)]">
+        {error && (
+          <div className="mb-4 rounded-sm bg-orange/8 px-3.5 py-3 text-[13px] leading-relaxed text-orange">{error}</div>
+        )}
+        <form action={handleRecuperar} className="flex flex-col">
+          <h1 className="font-display mb-1.5 text-2xl text-ink">Recuperar contraseña</h1>
+          <p className="mb-6.5 text-[13px] text-text-dim">
+            Escribí tu correo y te mandamos un link para elegir una nueva contraseña.
+          </p>
+
+          <Field label="Correo electrónico" name="email3" type="email" placeholder="nombre@correo.com" required />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full cursor-pointer rounded-[3px] bg-orange py-3.5 text-sm font-bold text-white transition-colors hover:bg-orange-2 disabled:opacity-60"
+          >
+            {loading ? "Enviando…" : "Enviar link →"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setRecuperar(false);
+              setError(null);
+            }}
+            className="mt-4 cursor-pointer text-[13px] text-text-dim hover:text-navy"
+          >
+            ← Volver a iniciar sesión
+          </button>
+        </form>
+      </div>
+    );
   }
 
   if (emailPendiente && !mostrarReenviar) {
@@ -221,6 +306,17 @@ export function AuthCard() {
 
           <Field label="Correo electrónico" name="email2" type="email" placeholder="nombre@correo.com" required />
           <Field label="Contraseña" name="pass2" type="password" placeholder="Tu contraseña" required />
+
+          <button
+            type="button"
+            onClick={() => {
+              setRecuperar(true);
+              setError(null);
+            }}
+            className="mb-5 cursor-pointer self-end text-[12.5px] text-navy-2 hover:text-orange"
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
 
           <button
             type="submit"
