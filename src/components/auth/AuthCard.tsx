@@ -14,14 +14,15 @@ export function AuthCard() {
   const [rol, setRol] = useState<Rol>("comprador");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
+  const [mostrarReenviar, setMostrarReenviar] = useState(false);
+  const [emailPendiente, setEmailPendiente] = useState<string | null>(null);
+  const [reenviado, setReenviado] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
   async function handleCrearCuenta(formData: FormData) {
     setLoading(true);
     setError(null);
-    setInfo(null);
 
     const nombre = String(formData.get("nombre") ?? "");
     const email = String(formData.get("email") ?? "");
@@ -46,14 +47,15 @@ export function AuthCard() {
       return;
     }
 
-    setInfo("Revisá tu correo para confirmar la cuenta antes de iniciar sesión.");
+    // Confirmación de correo requerida: Supabase no devuelve sesión todavía.
+    setEmailPendiente(email);
     setLoading(false);
   }
 
   async function handleIniciarSesion(formData: FormData) {
     setLoading(true);
     setError(null);
-    setInfo(null);
+    setMostrarReenviar(false);
 
     const email = String(formData.get("email2") ?? "");
     const password = String(formData.get("pass2") ?? "");
@@ -61,7 +63,13 @@ export function AuthCard() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setError("Todavía no confirmaste tu correo. Revisá tu bandeja de entrada, o reenviamos el link.");
+        setMostrarReenviar(true);
+        setEmailPendiente(email);
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }
@@ -74,6 +82,58 @@ export function AuthCard() {
 
     router.push("/");
     router.refresh();
+  }
+
+  async function handleReenviar() {
+    if (!emailPendiente) return;
+    setLoading(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email: emailPendiente });
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setReenviado(true);
+  }
+
+  if (emailPendiente && !mostrarReenviar) {
+    return (
+      <div className="w-full max-w-105 rounded-lg border border-line bg-white p-9 text-center shadow-[0_24px_48px_rgba(0,47,89,0.1)]">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-orange/10 text-2xl">
+          ✉️
+        </div>
+        <h1 className="font-display mb-2 text-xl text-ink">Revisá tu correo</h1>
+        <p className="mb-1 text-[13px] leading-relaxed text-text-dim">
+          Te mandamos un link de confirmación a
+        </p>
+        <p className="mb-5 text-sm font-semibold text-navy">{emailPendiente}</p>
+        <p className="mb-6 text-[13px] leading-relaxed text-text-dim">
+          Tocá el link del correo para activar tu cuenta. Después vas a poder iniciar sesión normalmente.
+        </p>
+
+        {reenviado ? (
+          <p className="text-[13px] text-navy-2">Te reenviamos el correo.</p>
+        ) : (
+          <button
+            onClick={handleReenviar}
+            disabled={loading}
+            className="cursor-pointer text-[13px] font-semibold text-navy-2 hover:text-orange disabled:opacity-60"
+          >
+            {loading ? "Reenviando…" : "¿No te llegó? Reenviar correo"}
+          </button>
+        )}
+
+        <button
+          onClick={() => {
+            setEmailPendiente(null);
+            setTab("entrar");
+          }}
+          className="mt-6 block w-full cursor-pointer text-[13px] text-text-dim hover:text-navy"
+        >
+          Volver a iniciar sesión →
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -97,14 +157,23 @@ export function AuthCard() {
         </button>
       </div>
 
-      {error && <p className="mb-4 text-[13px] text-orange">{error}</p>}
-      {info && <p className="mb-4 text-[13px] text-navy-2">{info}</p>}
+      {error && (
+        <div className="mb-4 rounded-sm bg-orange/8 px-3.5 py-3 text-[13px] leading-relaxed text-orange">
+          {error}
+          {mostrarReenviar && (
+            <button
+              onClick={handleReenviar}
+              disabled={loading}
+              className="mt-1.5 block cursor-pointer font-semibold underline disabled:opacity-60"
+            >
+              {loading ? "Reenviando…" : "Reenviar correo de confirmación"}
+            </button>
+          )}
+        </div>
+      )}
 
       {tab === "crear" ? (
-        <form
-          action={handleCrearCuenta}
-          className="flex flex-col"
-        >
+        <form action={handleCrearCuenta} className="flex flex-col">
           <h1 className="font-display mb-1.5 text-2xl text-ink">Sumate a Vértice Cube</h1>
           <p className="mb-6.5 text-[13px] text-text-dim">Elegí cómo vas a usar tu cuenta. Podés cambiarlo después.</p>
 
@@ -141,6 +210,9 @@ export function AuthCard() {
           >
             {loading ? "Creando cuenta…" : "Crear cuenta →"}
           </button>
+          <p className="mt-3.5 text-center text-[11.5px] leading-relaxed text-text-dim">
+            Te vamos a mandar un correo para confirmar la cuenta antes de que puedas ingresar.
+          </p>
         </form>
       ) : (
         <form action={handleIniciarSesion} className="flex flex-col">

@@ -5,6 +5,7 @@ import { HexIcon } from "@/components/HexIcon";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
 import { createClient } from "@/lib/supabase/server";
+import { cerrarSesion } from "@/app/actions/auth";
 import { R2_LIMITS } from "@/lib/r2";
 
 const ESTADO_LABEL = {
@@ -13,7 +14,19 @@ const ESTADO_LABEL = {
   rechazado: "Rechazado",
 } as const;
 
-export default async function VendedorPage() {
+const TABS = [
+  { id: "resumen", label: "Resumen" },
+  { id: "disenos", label: "Mis diseños" },
+  { id: "subir", label: "Subir diseño" },
+  { id: "pagos", label: "Pagos" },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
+
+export default async function VendedorPage(props: PageProps<"/vendedor">) {
+  const searchParams = await props.searchParams;
+  const tabParam = typeof searchParams.tab === "string" ? searchParams.tab : "resumen";
+  const tab: TabId = TABS.some((t) => t.id === tabParam) ? (tabParam as TabId) : "resumen";
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -46,145 +59,174 @@ export default async function VendedorPage() {
       <nav className="border-b border-line">
         <div className="mx-auto flex h-19 max-w-6xl items-center justify-between px-8">
           <Logo />
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-white">
-            {iniciales || "V"}
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-white">
+              {iniciales || "V"}
+            </div>
+            <form action={cerrarSesion}>
+              <button
+                type="submit"
+                className="cursor-pointer text-sm font-medium text-text-dim transition-colors hover:text-navy"
+              >
+                Salir
+              </button>
+            </form>
           </div>
         </div>
       </nav>
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-[220px_1fr]">
         <aside className="border-r border-line px-5 py-8 md:min-h-[calc(100vh-77px)]">
-          <SideLink href="#resumen" active>
-            Resumen
-          </SideLink>
-          <SideLink href="#mis-disenos">Mis diseños</SideLink>
-          <SideLink href="#subir">Subir diseño</SideLink>
-          <SideLink href="#pagos">Pagos</SideLink>
+          {TABS.map((t) => (
+            <SideLink key={t.id} href={`/vendedor?tab=${t.id}`} active={tab === t.id}>
+              {t.label}
+            </SideLink>
+          ))}
           <SideLink href="/">Volver a la tienda</SideLink>
         </aside>
 
-        <div className="px-6 py-9 pb-20 md:px-10" id="resumen">
+        <div className="px-6 py-9 pb-20 md:px-10">
           <div className="mb-7.5">
             <h1 className="font-display text-[26px] text-ink">Hola, {nombre.split(" ")[0]}</h1>
             <p className="mt-1 text-[13px] text-text-dim">Esto es lo que pasó con tus diseños</p>
           </div>
 
-          <div className="mb-10 grid grid-cols-1 gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Diseños publicados" value={String(aprobados)} />
-            <Stat label="En revisión" value={String(enRevision)} />
-            <Stat label="Comisión de la plataforma" value="20%" mono />
-            <Stat
-              label="Cobro de ventas"
-              value={cobroActivo ? "Activo" : `Faltan ${faltan}`}
-              mono
-              accent={cobroActivo}
-            />
-          </div>
+          {tab === "resumen" && (
+            <>
+              <div className="mb-10 grid grid-cols-1 gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+                <Stat label="Diseños publicados" value={String(aprobados)} />
+                <Stat label="En revisión" value={String(enRevision)} />
+                <Stat label="Comisión de la plataforma" value="20%" mono />
+                <Stat
+                  label="Cobro de ventas"
+                  value={cobroActivo ? "Activo" : `Faltan ${faltan}`}
+                  mono
+                  accent={cobroActivo}
+                />
+              </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-px border border-line bg-line md:grid-cols-3">
-            <RuleCard icon="©" titulo="Autoría propia">
-              Solo se aprueban diseños originales, hechos por vos. No se permite subir trabajo de terceros ni
-              escudos o marcas con derechos registrados.
-            </RuleCard>
-            <div className="bg-white px-6 py-5.5">
-              <div className="flex gap-4">
-                <div className="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-sm border border-line-strong font-mono text-[15px] font-bold text-orange">
-                  10
-                </div>
-                <div>
-                  <h3 className="mb-1.5 text-sm text-ink">Mínimo para activar el cobro</h3>
-                  <p className="text-[13px] leading-relaxed text-text-dim">
-                    El cobro por ventas se activa recién al llegar a <b>10 diseños aprobados</b>.
-                  </p>
-                  <div className="mt-3.5 h-1.25 overflow-hidden rounded-sm bg-paper">
-                    <div className="h-full rounded-sm bg-navy-2" style={{ width: `${progreso}%` }} />
+              <div className="grid grid-cols-1 gap-px border border-line bg-line md:grid-cols-3">
+                <RuleCard icon="©" titulo="Autoría propia">
+                  Solo se aprueban diseños originales, hechos por vos. No se permite subir trabajo de terceros ni
+                  escudos o marcas con derechos registrados.
+                </RuleCard>
+                <div className="bg-white px-6 py-5.5">
+                  <div className="flex gap-4">
+                    <div className="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-sm border border-line-strong font-mono text-[15px] font-bold text-orange">
+                      10
+                    </div>
+                    <div>
+                      <h3 className="mb-1.5 text-sm text-ink">Mínimo para activar el cobro</h3>
+                      <p className="text-[13px] leading-relaxed text-text-dim">
+                        El cobro por ventas se activa recién al llegar a <b>10 diseños aprobados</b>.
+                      </p>
+                      <div className="mt-3.5 h-1.25 overflow-hidden rounded-sm bg-paper">
+                        <div className="h-full rounded-sm bg-navy-2" style={{ width: `${progreso}%` }} />
+                      </div>
+                      <span className="mt-1.5 block font-mono text-[11px] text-navy-2">
+                        {aprobados} / {R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO} diseños aprobados
+                      </span>
+                    </div>
                   </div>
-                  <span className="mt-1.5 block font-mono text-[11px] text-navy-2">
-                    {aprobados} / {R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO} diseños aprobados
-                  </span>
                 </div>
+                <RuleCard icon="▭" titulo="Marco obligatorio">
+                  La imagen de portada tiene que estar exportada con el marco oficial de la plantilla. Sin marco, el
+                  diseño <b>no se aprueba</b>.
+                </RuleCard>
               </div>
-            </div>
-            <RuleCard icon="▭" titulo="Marco obligatorio">
-              La imagen de portada tiene que estar exportada con el marco oficial de la plantilla. Sin marco, el
-              diseño <b>no se aprueba</b>.
-            </RuleCard>
-          </div>
+            </>
+          )}
 
-          <Panel titulo="Subir diseño" id="subir">
-            <UploadForm />
-          </Panel>
+          {tab === "subir" && (
+            <Panel titulo="Subir diseño">
+              <UploadForm />
+            </Panel>
+          )}
 
-          <Panel titulo="Mis diseños" id="mis-disenos">
-            {misDisenos.length === 0 ? (
-              <p className="text-sm text-text-dim">Todavía no subiste ningún diseño.</p>
-            ) : (
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <Th>Diseño</Th>
-                    <Th>Estado</Th>
-                    <Th align="right">Precio</Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {misDisenos.map((d) => (
-                    <tr key={d.id} className="border-t border-line">
-                      <td className="py-3.5 pr-3">
-                        <Link href={`/producto/${d.id}`} className="flex items-center gap-2.5 text-sm hover:text-orange">
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-paper">
-                            <HexIcon className="h-4.5 w-4.5" />
-                          </span>
-                          {d.nombre}
-                        </Link>
-                      </td>
-                      <td className="py-3.5 pr-3">
-                        <span
-                          className={`rounded-sm px-2.25 py-1 text-[11px] tracking-wide uppercase ${
-                            d.estado === "publicado"
-                              ? "bg-navy/8 text-navy-2"
-                              : d.estado === "revision"
-                                ? "bg-orange/15 text-orange"
-                                : "bg-orange/10 text-text-dim"
-                          }`}
-                        >
-                          {ESTADO_LABEL[d.estado]}
-                        </span>
-                      </td>
-                      <td className="py-3.5 text-right font-mono text-sm">
-                        {d.es_gratis ? "Gratis" : `Gs. ${d.precio.toLocaleString("es-PY")}`}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </Panel>
-
-          <Panel titulo="Pagos" id="pagos">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className={`font-mono text-2xl font-bold ${cobroActivo ? "text-navy-2" : "text-text-dim"}`}>
-                  {cobroActivo ? "Disponible al vender" : "Bloqueado"}
-                </div>
-                <p className="mt-1 text-xs text-text-dim">
-                  {cobroActivo
-                    ? "Ya podés recibir pagos por transferencia bancaria manual."
-                    : `El cobro se activa al llegar a ${R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO} diseños aprobados (te faltan ${faltan}).`}
+          {tab === "disenos" && (
+            <Panel titulo="Mis diseños">
+              {misDisenos.length === 0 ? (
+                <p className="text-sm text-text-dim">
+                  Todavía no subiste ningún diseño.{" "}
+                  <Link href="/vendedor?tab=subir" className="text-navy-2 hover:text-orange">
+                    Subí el primero →
+                  </Link>
                 </p>
-              </div>
-              <button
-                disabled={!cobroActivo}
-                className="cursor-pointer rounded-sm border border-line-strong px-5 py-3 text-sm font-semibold transition-colors hover:border-text-dim hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Solicitar pago
-              </button>
-            </div>
-          </Panel>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Th>Diseño</Th>
+                      <Th>Estado</Th>
+                      <Th align="right">Precio</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {misDisenos.map((d) => (
+                      <tr key={d.id} className="border-t border-line">
+                        <td className="py-3.5 pr-3">
+                          <Link
+                            href={`/producto/${d.id}`}
+                            className="flex items-center gap-2.5 text-sm hover:text-orange"
+                          >
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-paper">
+                              <HexIcon className="h-4.5 w-4.5" />
+                            </span>
+                            {d.nombre}
+                          </Link>
+                        </td>
+                        <td className="py-3.5 pr-3">
+                          <span
+                            className={`rounded-sm px-2.25 py-1 text-[11px] tracking-wide uppercase ${
+                              d.estado === "publicado"
+                                ? "bg-navy/8 text-navy-2"
+                                : d.estado === "revision"
+                                  ? "bg-orange/15 text-orange"
+                                  : "bg-orange/10 text-text-dim"
+                            }`}
+                          >
+                            {ESTADO_LABEL[d.estado]}
+                          </span>
+                        </td>
+                        <td className="py-3.5 text-right font-mono text-sm">
+                          {d.es_gratis ? "Gratis" : `Gs. ${d.precio.toLocaleString("es-PY")}`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </Panel>
+          )}
 
-          <Panel titulo="Método de cobro">
-            <MetodoCobroForm vendedorId={user.id} metodo={metodo ?? null} />
-          </Panel>
+          {tab === "pagos" && (
+            <>
+              <Panel titulo="Pagos">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className={`font-mono text-2xl font-bold ${cobroActivo ? "text-navy-2" : "text-text-dim"}`}>
+                      {cobroActivo ? "Disponible al vender" : "Bloqueado"}
+                    </div>
+                    <p className="mt-1 text-xs text-text-dim">
+                      {cobroActivo
+                        ? "Ya podés recibir pagos por transferencia bancaria manual."
+                        : `El cobro se activa al llegar a ${R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO} diseños aprobados (te faltan ${faltan}).`}
+                    </p>
+                  </div>
+                  <button
+                    disabled={!cobroActivo}
+                    className="cursor-pointer rounded-sm border border-line-strong px-5 py-3 text-sm font-semibold transition-colors hover:border-text-dim hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Solicitar pago
+                  </button>
+                </div>
+              </Panel>
+
+              <Panel titulo="Método de cobro">
+                <MetodoCobroForm vendedorId={user.id} metodo={metodo ?? null} />
+              </Panel>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -229,9 +271,9 @@ function RuleCard({ icon, titulo, children }: { icon: string; titulo: string; ch
   );
 }
 
-function Panel({ titulo, id, children }: { titulo: string; id?: string; children: React.ReactNode }) {
+function Panel({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div id={id} className="mb-9 rounded-sm border border-line">
+    <div className="mb-9 rounded-sm border border-line">
       <div className="border-b border-line px-6 py-4.5">
         <h2 className="text-base text-ink">{titulo}</h2>
       </div>
