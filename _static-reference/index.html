@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VÉRTICE CUBE — Diseños deportivos para sublimación</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F7F9;
+    --white:#FFFFFF;
+    --navy:#002F59;
+    --navy-2:#0A3E68;
+    --ink:#0B2036;
+    --text-dim:#5B6472;
+    --orange:#FE6601;
+    --orange-2:#FF7C24;
+    --line: rgba(0,47,89,0.12);
+    --line-strong: rgba(0,47,89,0.22);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}
+  }
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(18px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  @keyframes floatSlow{
+    from{transform:translateY(0) rotate(0deg);}
+    to{transform:translateY(-14px) rotate(2deg);}
+  }
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.is-visible{opacity:1;transform:translateY(0);}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  .display{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;letter-spacing:0.02em;}
+
+  /* NAV */
+  nav{
+    position:relative;background:var(--white);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex;align-items:center;justify-content:space-between;
+    height:76px;
+  }
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .logo-mark{height:38px;width:auto;display:block;}
+  .logo-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.01em;color:var(--navy);}
+  .logo-text span{color:var(--orange);}
+  .nav-links{display:flex;gap:36px;align-items:center;}
+  .nav-links a{
+    color:var(--text-dim);text-decoration:none;font-size:14px;font-weight:500;
+    position:relative;padding-bottom:3px;transition:color .15s;
+  }
+  .nav-links a::after{
+    content:'';position:absolute;left:0;bottom:0;height:2px;width:0;
+    background:var(--orange);transition:width .22s ease;
+  }
+  .nav-links a:hover{color:var(--navy);}
+  .nav-links a:hover::after{width:100%;}
+  .nav-cta{
+    background:var(--navy);color:var(--white);
+    padding:11px 22px;border-radius:3px;
+    font-size:14px;font-weight:600;text-decoration:none;
+    transition:background .18s ease, transform .18s ease;
+  }
+  .nav-cta:hover{background:var(--orange);transform:translateY(-1px);}
+
+  /* HERO */
+  .hero{
+    position:relative;overflow:hidden;
+    padding:100px 0 116px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-hex{
+    position:absolute;pointer-events:none;
+  }
+  .hero-hex.h1{top:-140px;right:-160px;width:620px;height:620px;opacity:.5;animation:floatSlow 9s ease-in-out infinite alternate;}
+  .hero-hex.h2{bottom:-220px;left:-180px;width:520px;height:520px;opacity:.35;}
+  .hero-grid{
+    display:grid;grid-template-columns:1.15fr 0.85fr;gap:48px;align-items:center;position:relative;z-index:2;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange);
+    letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px;display:block;font-weight:700;
+    opacity:0;animation:fadeUp .6s ease forwards;animation-delay:.05s;
+  }
+  .hero h1{
+    font-size:56px;line-height:1.04;margin-bottom:22px;color:var(--navy);
+    opacity:0;animation:fadeUp .6s ease forwards;animation-delay:.18s;
+  }
+  .hero h1 em{font-style:normal;color:var(--orange);}
+  .hero p{
+    font-size:17px;line-height:1.6;color:var(--text-dim);max-width:460px;margin-bottom:32px;
+    opacity:0;animation:fadeUp .6s ease forwards;animation-delay:.32s;
+  }
+  .hero-actions{
+    display:flex;gap:14px;
+    opacity:0;animation:fadeUp .6s ease forwards;animation-delay:.44s;
+  }
+  .btn-primary{
+    background:var(--orange);color:var(--white);font-weight:700;
+    padding:15px 26px;border-radius:3px;text-decoration:none;font-size:15px;
+    display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;
+    transition:transform .18s ease, background .18s ease, gap .18s ease;
+  }
+  .btn-primary:hover{background:var(--orange-2);gap:12px;transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0) scale(0.98);}
+  .btn-ghost{
+    border:1.5px solid var(--line-strong);color:var(--navy);font-weight:600;
+    padding:15px 26px;border-radius:3px;text-decoration:none;font-size:15px;background:var(--white);
+    transition:border-color .18s ease, background .18s ease, transform .18s ease;
+  }
+  .btn-ghost:hover{border-color:var(--navy);background:var(--paper);transform:translateY(-1px);}
+  .btn-ghost:active{transform:translateY(0) scale(0.98);}
+
+  /* SPEC CARD (signature element) */
+  .kit-preview{
+    position:relative;background:var(--white);border:1px solid var(--line);border-radius:8px;
+    padding:28px;box-shadow:0 24px 48px rgba(0,47,89,0.08);
+    opacity:0;animation:fadeUp .7s ease forwards;animation-delay:.36s;
+  }
+  .kit-preview-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+  .kit-preview-head .mono{font-size:11px;color:var(--text-dim);}
+  .kit-shape{
+    width:100%;height:200px;margin:0 auto 18px;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--paper);border-radius:6px;border:1px dashed var(--line-strong);
+  }
+  .kit-shape svg{width:96px;height:96px;}
+  .kit-shape .vp-label{position:absolute;bottom:12px;font-size:10px;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+  .kit-specs{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--line);padding-top:16px;}
+  .kit-spec-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;}
+  .kit-spec-value{font-size:13px;font-weight:600;color:var(--navy);}
+
+  /* SECTION HEAD */
+  .section{padding:88px 0;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:44px;gap:24px;}
+  .section-head h2{font-size:32px;line-height:1.08;color:var(--navy);}
+  .section-head p{color:var(--text-dim);font-size:15px;max-width:340px;}
+
+  /* CATALOG */
+  .catalog-tools{margin-bottom:28px;}
+  .search-bar{position:relative;margin-bottom:18px;}
+  .search-bar input{
+    width:100%;background:var(--paper);border:1.5px solid var(--line-strong);color:var(--ink);
+    padding:14px 16px 14px 44px;border-radius:6px;font-size:15px;font-family:'Inter',sans-serif;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .search-bar input:focus{outline:none;border-color:var(--orange);background:var(--white);}
+  .search-bar svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;pointer-events:none;}
+  .search-bar .clear-btn{
+    position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    background:var(--line-strong);border:none;color:var(--navy);width:22px;height:22px;border-radius:50%;
+    font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center;
+  }
+  .search-bar input:not(:placeholder-shown) ~ .clear-btn{display:flex;}
+  .filter-chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    background:var(--paper);border:1px solid var(--line-strong);color:var(--text-dim);
+    font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:20px;cursor:pointer;
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--navy);color:var(--navy);}
+  .chip.active{background:var(--navy);border-color:var(--navy);color:var(--white);}
+  .chip.active[data-filter="pro"]{background:var(--orange);border-color:var(--orange);}
+  .no-results{display:none;grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--text-dim);font-size:14px;}
+  .no-results.show{display:block;}
+  .card-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:2px;display:block;}
+  .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--navy-2);background:var(--paper);
+    padding:3px 8px;border-radius:10px;border:1px solid var(--line);
+  }
+  .card.hidden{display:none;}
+  .card.paginated{display:none;}
+  .catalog-footer{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:40px;}
+  .results-count{color:var(--text-dim);font-size:12px;}
+  .pagination{display:flex;gap:8px;align-items:center;}
+  .page-btn{
+    min-width:38px;height:38px;padding:0 6px;border-radius:6px;border:1px solid var(--line-strong);
+    background:var(--white);color:var(--navy);font-family:'JetBrains Mono',monospace;font-size:13px;
+    font-weight:600;cursor:pointer;transition:all .15s ease;
+  }
+  .page-btn:hover{border-color:var(--navy);}
+  .page-btn.active{background:var(--navy);border-color:var(--navy);color:var(--white);}
+  .page-btn:disabled{opacity:.35;cursor:not-allowed;}
+  .page-btn.arrow{color:var(--text-dim);border-color:transparent;background:transparent;}
+  .page-btn.arrow:hover:not(:disabled){color:var(--navy);}
+  .catalog{border-top:1px solid var(--line);background:var(--white);}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .card{
+    background:var(--white);padding:26px 22px 22px;position:relative;
+    transition:background .2s ease, transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{
+    background:var(--white);transform:translateY(-5px);
+    box-shadow:0 18px 32px rgba(0,47,89,0.12);z-index:1;
+  }
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+  .card-num{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;color:var(--line-strong);line-height:1;
+    transition:color .25s ease;
+  }
+  .card:hover .card-num{color:var(--orange);}
+  .card:hover .hex-icon{transform:scale(1.06);}
+  .hex-icon{transition:transform .3s ease;}
+  .badge{
+    font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 8px;border-radius:2px;
+    text-transform:uppercase;letter-spacing:0.05em;font-weight:700;
+  }
+  .badge-free{background:rgba(0,47,89,0.08);color:var(--navy);}
+  .badge-paid{background:rgba(254,102,1,0.12);color:var(--orange);}
+  .badge-pro{
+    background:linear-gradient(100deg, var(--navy) 0%, var(--navy-2) 100%);color:var(--white);
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .badge-pro::before{content:'★';font-size:9px;color:var(--orange);}
+  .card.card-pro{
+    background:linear-gradient(180deg, rgba(254,102,1,0.05) 0%, var(--white) 60%);
+    border:1.5px solid transparent;
+    background-image: linear-gradient(var(--white), var(--white)), linear-gradient(135deg, var(--orange) 0%, var(--navy) 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position:relative;
+  }
+  .card.card-pro::after{
+    content:'DESTACADO';
+    position:absolute;top:0;right:22px;
+    background:var(--orange);color:var(--white);font-family:'JetBrains Mono',monospace;
+    font-size:9px;font-weight:700;letter-spacing:.06em;padding:4px 8px;
+    border-radius:0 0 4px 4px;
+  }
+  .card.card-pro:hover{transform:translateY(-7px);box-shadow:0 22px 40px rgba(254,102,1,0.18);}
+  .card-swatch{
+    height:120px;border-radius:6px;margin-bottom:16px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;background:var(--paper);border:1px solid var(--line);
+  }
+  .card-swatch img{width:100%;height:100%;object-fit:cover;display:block;}
+  .card-swatch .hex-icon{width:52px;height:52px;}
+  .card h3{font-size:15px;font-weight:600;margin-bottom:4px;color:var(--navy);}
+  .card .meta{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+  .card-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;}
+  .price{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--navy);}
+  .card-foot button{
+    background:transparent;border:1px solid var(--line-strong);color:var(--navy);
+    font-size:12px;font-weight:600;padding:7px 12px;border-radius:3px;cursor:pointer;
+    transition:background .18s ease, border-color .18s ease, transform .12s ease, color .18s ease;
+  }
+  .card-foot button:hover{background:var(--orange);border-color:var(--orange);color:var(--white);}
+  .card-foot button:active{transform:scale(0.96);}
+
+  /* HOW IT WORKS */
+  .how{border-top:1px solid var(--line);}
+  .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .how-item{background:var(--white);padding:32px 28px;}
+  .how-tag{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange);margin-bottom:14px;display:block;font-weight:700;}
+  .how-item h4{font-size:17px;margin-bottom:10px;color:var(--navy);}
+  .how-item p{font-size:14px;color:var(--text-dim);line-height:1.6;}
+
+  /* SELL CTA */
+  .sell{
+    border-top:1px solid var(--line);
+    background:var(--navy);
+    padding:80px 0;position:relative;overflow:hidden;
+  }
+  .sell-hex{position:absolute;top:-100px;right:-60px;width:420px;height:420px;opacity:.15;pointer-events:none;}
+  .sell .wrap{display:flex;justify-content:space-between;align-items:center;gap:40px;position:relative;z-index:2;}
+  .sell h2{font-size:30px;max-width:480px;line-height:1.1;color:var(--white);}
+  .sell p{color:rgba(255,255,255,0.7);font-size:15px;margin-top:12px;max-width:440px;}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;background:var(--white);}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;}
+  footer .mono{font-size:12px;color:var(--text-dim);}
+  .foot-links{display:flex;gap:24px;}
+  .foot-links a{color:var(--text-dim);font-size:13px;text-decoration:none;}
+  .foot-links a:hover{color:var(--navy);}
+
+  @media(max-width:900px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:40px;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .how-grid{grid-template-columns:1fr;}
+    .sell .wrap{flex-direction:column;align-items:flex-start;}
+    nav .nav-links{display:none;}
+    .section-head{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="logo">
+      <img src="logo-mark.png" alt="Vértice Cube" class="logo-mark">
+      <span class="logo-text">VÉRTICE<span> CUBE</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#vender">Vender diseños</a>
+    </div>
+    <a href="registro.html" class="nav-cta">Iniciar sesión</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <svg class="hero-hex h1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="200,20 350,105 350,295 200,380 50,295 50,105" fill="none" stroke="var(--navy)" stroke-width="2"/>
+    <polygon points="200,70 310,132 310,268 200,330 90,268 90,132" fill="none" stroke="var(--orange)" stroke-width="2"/>
+  </svg>
+  <svg class="hero-hex h2" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="200,20 350,105 350,295 200,380 50,295 50,105" fill="none" stroke="var(--navy)" stroke-width="1.5"/>
+  </svg>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Archivos listos para sublimación · .RAR</span>
+      <h1 class="display">Diseños que<br>visten <em>equipos</em></h1>
+      <p>Camisetas, kits de básquet, vóley y más — listos en AI, PSD y PDF, empacados en un solo archivo. Descargá gratis o accedé a los diseños PRO.</p>
+      <div class="hero-actions">
+        <a href="#catalogo" class="btn-primary">Ver catálogo →</a>
+        <a href="#vender" class="btn-ghost">Vender mis diseños</a>
+      </div>
+    </div>
+    <div class="kit-preview">
+      <div class="kit-preview-head">
+        <div>
+          <div class="mono">KIT-0142 · LOCAL</div>
+        </div>
+        <span class="badge badge-free">Gratis</span>
+      </div>
+      <div class="kit-shape">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="3"/>
+          <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="vp-label">Vista previa del diseño</span>
+      </div>
+      <div class="kit-specs">
+        <div>
+          <div class="kit-spec-label">Deporte</div>
+          <div class="kit-spec-value">Fútbol 11</div>
+        </div>
+        <div>
+          <div class="kit-spec-label">Formato</div>
+          <div class="kit-spec-value mono">.RAR · AI/PSD</div>
+        </div>
+        <div>
+          <div class="kit-spec-label">Resolución</div>
+          <div class="kit-spec-value">300 DPI</div>
+        </div>
+        <div>
+          <div class="kit-spec-label">Precio</div>
+          <div class="kit-spec-value mono">Gratis</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section catalog" id="catalogo">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="display">Catálogo<br>reciente</h2>
+      <p>Nuevos kits cada semana. Filtra por deporte, club o formato de archivo.</p>
+    </div>
+    <div class="catalog-tools">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="var(--text-dim)" stroke-width="2"/><path d="M20 20L16.5 16.5" stroke="var(--text-dim)" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="search-input" placeholder="Buscar por nombre, código (KIT-0142) o etiqueta...">
+        <button class="clear-btn" id="clear-search">×</button>
+      </div>
+      <div class="filter-chips" id="filter-chips">
+        <button class="chip active" data-filter="todos">Todos</button>
+        <button class="chip" data-filter="pro">★ Pro</button>
+        <button class="chip" data-filter="gratis">Gratis</button>
+        <button class="chip" data-filter="futbol">Fútbol</button>
+        <button class="chip" data-filter="basquet">Básquet</button>
+        <button class="chip" data-filter="voley">Vóley</button>
+      </div>
+    </div>
+    <div class="grid" id="catalog-grid">
+      <div class="no-results" id="no-results">No encontramos diseños que coincidan. Probá con otra palabra o quitá el filtro.</div>
+
+      <div class="card card-pro reveal" data-sport="futbol" data-type="pro">
+        <div class="card-top"><span class="card-num">01</span><span class="badge badge-pro">Pro</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0101</span><h3>Kit Élite Vértice</h3>
+        <div class="card-tags"><span class="tag">#local</span><span class="tag">#élite</span><span class="tag">#oficial</span></div>
+        <div class="meta">Fútbol · Diseño oficial Vértice Cube</div>
+        <div class="card-foot"><span class="price">Gs. 35.000</span><button>Comprar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">04</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0104</span><h3>Kit Visitante Aurora</h3>
+        <div class="card-tags"><span class="tag">#visitante</span><span class="tag">#azul</span></div>
+        <div class="meta">Fútbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card card-pro reveal" data-sport="basquet" data-type="pro">
+        <div class="card-top"><span class="card-num">17</span><span class="badge badge-pro">Pro</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0117</span><h3>Kit Básquet Tigres</h3>
+        <div class="card-tags"><span class="tag">#tigres</span><span class="tag">#oficial</span></div>
+        <div class="meta">Básquetbol · Diseño oficial Vértice Cube</div>
+        <div class="card-foot"><span class="price">Gs. 28.000</span><button>Comprar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="voley" data-type="gratis">
+        <div class="card-top"><span class="card-num">22</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0122</span><h3>Kit Vóley Costa</h3>
+        <div class="card-tags"><span class="tag">#costa</span><span class="tag">#celeste</span></div>
+        <div class="meta">Vóleibol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">09</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0109</span><h3>Kit Local Estrella</h3>
+        <div class="card-tags"><span class="tag">#local</span><span class="tag">#clásico</span></div>
+        <div class="meta">Fútbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="voley" data-type="gratis">
+        <div class="card-top"><span class="card-num">11</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0111</span><h3>Kit Vóley Norte</h3>
+        <div class="card-tags"><span class="tag">#norte</span><span class="tag">#blanco</span></div>
+        <div class="meta">Vóleibol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">14</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0114</span><h3>Kit Alterno Fénix</h3>
+        <div class="card-tags"><span class="tag">#alterno</span><span class="tag">#retro</span></div>
+        <div class="meta">Fútbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card card-pro reveal" data-sport="voley" data-type="pro">
+        <div class="card-top"><span class="card-num">26</span><span class="badge badge-pro">Pro</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0126</span><h3>Kit Vóley Élite</h3>
+        <div class="card-tags"><span class="tag">#élite</span><span class="tag">#oficial</span></div>
+        <div class="meta">Vóleibol · Diseño oficial Vértice Cube</div>
+        <div class="card-foot"><span class="price">Gs. 30.000</span><button>Comprar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">30</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0130</span><h3>Kit Retro Cóndor</h3>
+        <div class="card-tags"><span class="tag">#retro</span><span class="tag">#negro</span></div>
+        <div class="meta">Fútbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="basquet" data-type="gratis">
+        <div class="card-top"><span class="card-num">33</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0133</span><h3>Kit Básquet Pumas</h3>
+        <div class="card-tags"><span class="tag">#pumas</span><span class="tag">#naranja</span></div>
+        <div class="meta">Básquetbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="voley" data-type="gratis">
+        <div class="card-top"><span class="card-num">36</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0136</span><h3>Kit Vóley Sur</h3>
+        <div class="card-tags"><span class="tag">#sur</span><span class="tag">#verde</span></div>
+        <div class="meta">Vóleibol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card card-pro reveal" data-sport="futbol" data-type="pro">
+        <div class="card-top"><span class="card-num">39</span><span class="badge badge-pro">Pro</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0139</span><h3>Kit Local Halcones</h3>
+        <div class="card-tags"><span class="tag">#halcones</span><span class="tag">#oficial</span></div>
+        <div class="meta">Fútbol · Diseño oficial Vértice Cube</div>
+        <div class="card-foot"><span class="price">Gs. 25.000</span><button>Comprar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">42</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0142b</span><h3>Kit Suplente Río</h3>
+        <div class="card-tags"><span class="tag">#suplente</span><span class="tag">#celeste</span></div>
+        <div class="meta">Fútbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="basquet" data-type="gratis">
+        <div class="card-top"><span class="card-num">45</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0145</span><h3>Kit Básquet Lobos</h3>
+        <div class="card-tags"><span class="tag">#lobos</span><span class="tag">#gris</span></div>
+        <div class="meta">Básquetbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="voley" data-type="gratis">
+        <div class="card-top"><span class="card-num">48</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0148</span><h3>Kit Vóley Andes</h3>
+        <div class="card-tags"><span class="tag">#andes</span><span class="tag">#blanco</span></div>
+        <div class="meta">Vóleibol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">51</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0151</span><h3>Kit Fútbol Sala Rayo</h3>
+        <div class="card-tags"><span class="tag">#futsal</span><span class="tag">#amarillo</span></div>
+        <div class="meta">Fútbol sala · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card card-pro reveal" data-sport="basquet" data-type="pro">
+        <div class="card-top"><span class="card-num">54</span><span class="badge badge-pro">Pro</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0154</span><h3>Kit Básquet Élite</h3>
+        <div class="card-tags"><span class="tag">#élite</span><span class="tag">#oficial</span></div>
+        <div class="meta">Básquetbol · Diseño oficial Vértice Cube</div>
+        <div class="card-foot"><span class="price">Gs. 25.000</span><button>Comprar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="voley" data-type="gratis">
+        <div class="card-top"><span class="card-num">57</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0157</span><h3>Kit Vóley Norte II</h3>
+        <div class="card-tags"><span class="tag">#norte</span><span class="tag">#azul</span></div>
+        <div class="meta">Vóleibol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="futbol" data-type="gratis">
+        <div class="card-top"><span class="card-num">60</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0160</span><h3>Kit Retro Titanes</h3>
+        <div class="card-tags"><span class="tag">#retro</span><span class="tag">#vino</span></div>
+        <div class="meta">Fútbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+      <div class="card reveal" data-sport="basquet" data-type="gratis">
+        <div class="card-top"><span class="card-num">63</span><span class="badge badge-free">Gratis</span></div>
+        <div class="card-swatch">
+          <svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/>
+            <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="card-code">KIT-0163</span><h3>Kit Básquet Cometas</h3>
+        <div class="card-tags"><span class="tag">#cometas</span><span class="tag">#celeste</span></div>
+        <div class="meta">Básquetbol · .RAR (AI, PSD)</div>
+        <div class="card-foot"><span class="price">Gratis</span><button>Descargar</button></div>
+      </div>
+
+    </div>
+
+    <div class="catalog-footer" id="catalog-footer">
+      <span class="results-count mono" id="results-count"></span>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section how" id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="display">Cómo<br>funciona</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-item reveal">
+        <span class="how-tag mono">01</span>
+        <h4>Elegís el diseño</h4>
+        <p>Filtrá por deporte o formato. Cada ficha muestra el detalle del archivo antes de descargar.</p>
+      </div>
+      <div class="how-item reveal">
+        <span class="how-tag mono">02</span>
+        <h4>Elegís gratis o PRO</h4>
+        <p>La mayoría del catálogo es gratuito. Los diseños marcados <b>PRO</b> son pagos y se compran al instante.</p>
+      </div>
+      <div class="how-item reveal">
+        <span class="how-tag mono">03</span>
+        <h4>Descargás el .RAR</h4>
+        <p>El link de descarga se habilita al instante y el archivo queda disponible en tu cuenta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sell" id="vender">
+  <svg class="sell-hex" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="200,20 350,105 350,295 200,380 50,295 50,105" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <polygon points="200,70 310,132 310,268 200,330 90,268 90,132" fill="none" stroke="var(--orange)" stroke-width="2"/>
+  </svg>
+  <div class="wrap reveal">
+    <div>
+      <h2 class="display">¿Diseñás kits deportivos?</h2>
+      <p>Subí tus archivos y sumá tu trabajo al catálogo. La venta con comisión llega pronto.</p>
+    </div>
+    <a href="registro.html" class="btn-primary">Empezar a vender →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">VÉRTICE CUBE © 2026</span>
+    <div class="foot-links">
+      <a href="#">Términos</a>
+      <a href="#">Contacto</a>
+      <a href="#">Soporte</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const revealItems = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if(entry.isIntersecting){
+        setTimeout(() => entry.target.classList.add('is-visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealItems.forEach(el => observer.observe(el));
+
+  // Búsqueda, filtros y paginación del catálogo
+  const searchInput = document.getElementById('search-input');
+  const clearBtn = document.getElementById('clear-search');
+  const chips = document.querySelectorAll('.chip');
+  const cards = Array.from(document.querySelectorAll('#catalog-grid .card'));
+  const noResults = document.getElementById('no-results');
+  const pagination = document.getElementById('pagination');
+  const resultsCount = document.getElementById('results-count');
+  const PAGE_SIZE = 20;
+  let activeFilter = 'todos';
+  let currentPage = 1;
+
+  function cardText(card){
+    return card.textContent.toLowerCase();
+  }
+
+  function renderPagination(totalPages){
+    pagination.innerHTML = '';
+    if(totalPages <= 1) return;
+
+    const makeBtn = (label, page, opts = {}) => {
+      const btn = document.createElement('button');
+      btn.className = 'page-btn' + (opts.arrow ? ' arrow' : '') + (page === currentPage ? ' active' : '');
+      btn.textContent = label;
+      btn.disabled = !!opts.disabled;
+      btn.addEventListener('click', () => { currentPage = page; applyFilters(); window.scrollTo({top: document.getElementById('catalogo').offsetTop - 90, behavior:'smooth'}); });
+      return btn;
+    };
+
+    pagination.appendChild(makeBtn('‹', currentPage - 1, { arrow:true, disabled: currentPage === 1 }));
+    for(let p = 1; p <= totalPages; p++){
+      pagination.appendChild(makeBtn(String(p), p));
+    }
+    pagination.appendChild(makeBtn('›', currentPage + 1, { arrow:true, disabled: currentPage === totalPages }));
+  }
+
+  function applyFilters(){
+    const query = searchInput.value.trim().toLowerCase();
+    const isBrowsing = query === '' && activeFilter === 'todos';
+
+    const matches = cards.filter(card => {
+      const sport = card.dataset.sport;
+      const type = card.dataset.type;
+      let matchesFilter = true;
+      if(activeFilter === 'pro') matchesFilter = type === 'pro';
+      else if(activeFilter === 'gratis') matchesFilter = type === 'gratis';
+      else if(['futbol','basquet','voley'].includes(activeFilter)) matchesFilter = sport === activeFilter;
+      const matchesQuery = query === '' || cardText(card).includes(query);
+      return matchesFilter && matchesQuery;
+    });
+
+    cards.forEach(card => card.classList.add('hidden'));
+
+    let shown;
+    if(isBrowsing){
+      const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      shown = matches.slice(start, start + PAGE_SIZE);
+      renderPagination(totalPages);
+    } else {
+      shown = matches;
+      pagination.innerHTML = '';
+    }
+
+    shown.forEach(card => card.classList.remove('hidden'));
+    noResults.classList.toggle('show', matches.length === 0);
+
+    resultsCount.textContent = isBrowsing
+      ? `${matches.length} diseños en total`
+      : `${matches.length} resultado${matches.length === 1 ? '' : 's'}`;
+  }
+
+  searchInput.addEventListener('input', () => { currentPage = 1; applyFilters(); });
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    currentPage = 1;
+    applyFilters();
+    searchInput.focus();
+  });
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      currentPage = 1;
+      applyFilters();
+    });
+  });
+
+  applyFilters();
+</script>
+</body>
+</html>

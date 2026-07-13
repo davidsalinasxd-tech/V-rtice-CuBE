@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIT-0142 · Kit Local — VÉRTICE CUBE</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F7F9; --white:#FFFFFF; --navy:#002F59; --navy-2:#0A3E68;
+    --ink:#0B2036; --text-dim:#5B6472; --orange:#FE6601; --orange-2:#FF7C24;
+    --line: rgba(0,47,89,0.12); --line-strong: rgba(0,47,89,0.22);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  .display{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;letter-spacing:.02em;}
+
+  nav{background:var(--white);border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .logo-mark{height:38px;width:auto;display:block;}
+  .logo-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.01em;color:var(--navy);}
+  .logo-text span{color:var(--orange);}
+  .nav-links{display:flex;gap:36px;}
+  .nav-links a{color:var(--text-dim);text-decoration:none;font-size:14px;font-weight:500;position:relative;padding-bottom:3px;}
+  .nav-links a::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--orange);transition:width .22s ease;}
+  .nav-links a:hover{color:var(--navy);}
+  .nav-links a:hover::after{width:100%;}
+  .nav-cta{background:var(--navy);color:var(--white);padding:11px 22px;border-radius:3px;font-size:14px;font-weight:600;text-decoration:none;transition:background .18s ease,transform .18s ease;}
+  .nav-cta:hover{background:var(--orange);transform:translateY(-1px);}
+
+  .crumb{padding:22px 0 0;font-size:13px;color:var(--text-dim);}
+  .crumb a{color:var(--text-dim);text-decoration:none;}
+  .crumb a:hover{color:var(--navy);}
+  .crumb span{color:var(--navy);}
+
+  .product{display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;padding:36px 0 90px;align-items:start;}
+
+  .viewer{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:32px;box-shadow:0 20px 40px rgba(0,47,89,0.06);}
+  .viewer-stage{
+    height:360px;display:flex;align-items:center;justify-content:center;position:relative;
+    border-radius:6px;overflow:hidden;background:var(--paper);border:1px dashed var(--line-strong);
+  }
+  .viewer-stage img{width:100%;height:100%;object-fit:cover;display:block;}
+  .hex-lg{width:190px;height:190px;animation:floatY 4.5s ease-in-out infinite;}
+  @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  .viewer-stage .vp-label{position:absolute;bottom:16px;font-size:11px;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+  .info-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border-radius:2px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;background:rgba(0,47,89,0.08);color:var(--navy);}
+  h1.pname{font-size:32px;line-height:1.08;margin-bottom:10px;color:var(--navy);}
+  .seller-line{font-size:13px;color:var(--text-dim);margin-bottom:26px;}
+  .seller-line a{color:var(--orange);text-decoration:none;}
+
+  .spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:28px;}
+  .spec{background:var(--white);padding:14px 16px;}
+  .spec-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+  .spec-value{font-size:14px;font-weight:600;color:var(--navy);}
+
+  .buybox{border:1px solid var(--line-strong);border-radius:8px;padding:24px;margin-bottom:28px;background:var(--white);}
+  .buybox-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .price-lg{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;color:var(--navy);}
+  .price-lg .cur{font-size:14px;color:var(--text-dim);margin-right:6px;}
+  .btn-primary{background:var(--orange);color:var(--white);font-weight:700;padding:15px 26px;border-radius:3px;text-decoration:none;font-size:15px;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;width:100%;justify-content:center;transition:transform .18s ease,background .18s ease,gap .18s ease;}
+  .btn-primary:hover{background:var(--orange-2);gap:12px;transform:translateY(-1px);}
+  .buybox-note{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);margin-top:14px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);}
+
+  .desc h3{font-size:15px;margin-bottom:10px;color:var(--navy);}
+  .desc p{font-size:14px;line-height:1.7;color:var(--text-dim);margin-bottom:20px;}
+  .includes{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .includes li{font-size:13px;color:var(--ink);display:flex;align-items:center;gap:10px;}
+  .includes li::before{content:'';width:5px;height:5px;background:var(--orange);}
+
+  .related{border-top:1px solid var(--line);padding:70px 0;background:var(--white);}
+  .related h2{font-size:24px;margin-bottom:32px;color:var(--navy);}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .card{background:var(--white);padding:22px 20px 20px;transition:background .2s ease,transform .25s ease,box-shadow .25s ease;opacity:0;transform:translateY(20px);animation:fadeUp .5s ease forwards;}
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+  .card:hover{background:var(--white);transform:translateY(-4px);box-shadow:0 14px 26px rgba(0,47,89,0.1);}
+  .card-swatch{height:100px;border-radius:6px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;background:var(--paper);border:1px solid var(--line);}
+  .card-swatch .hex-icon{width:44px;height:44px;}
+  .card h4{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--navy);}
+  .card .meta{font-size:12px;color:var(--text-dim);}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;background:var(--white);}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;}
+  footer .mono{font-size:12px;color:var(--text-dim);}
+
+  @media(max-width:900px){
+    .product{grid-template-columns:1fr;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    nav .nav-links{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="logo">
+      <img src="logo-mark.png" alt="Vértice Cube" class="logo-mark">
+      <span class="logo-text">VÉRTICE<span> CUBE</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#catalogo">Catálogo</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="vendedor.html">Vender diseños</a>
+    </div>
+    <a href="registro.html" class="nav-cta">Iniciar sesión</a>
+  </div>
+</nav>
+
+<div class="wrap crumb">
+  <a href="index.html">Catálogo</a> / <a href="index.html#catalogo">Fútbol</a> / <span>Kit Local</span>
+</div>
+
+<section class="product wrap">
+  <div class="viewer">
+    <div class="viewer-stage">
+      <svg class="hex-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="2.5"/>
+        <path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="vp-label">Vista previa del diseño</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="info-head"><span class="badge">Gratis</span></div>
+    <h1 class="pname display">Kit Local Estrella</h1>
+    <div class="seller-line">Subido por <a href="#">@martina.designs</a> · 214 descargas</div>
+
+    <div class="spec-grid">
+      <div class="spec"><div class="spec-label">Deporte</div><div class="spec-value">Fútbol 11</div></div>
+      <div class="spec"><div class="spec-label">Formato</div><div class="spec-value mono">.RAR</div></div>
+      <div class="spec"><div class="spec-label">Resolución</div><div class="spec-value">300 DPI</div></div>
+    </div>
+
+    <div class="buybox">
+      <div class="buybox-row">
+        <span style="font-size:13px;color:var(--text-dim);">Precio</span>
+        <span class="price-lg">Gratis</span>
+      </div>
+      <button class="btn-primary">Descargar diseño →</button>
+      <div class="buybox-note"><span class="dot"></span>El link de descarga se habilita al instante</div>
+    </div>
+
+    <div class="desc">
+      <h3>Descripción</h3>
+      <p>Kit completo listo para sublimación: camiseta titular, pantalón y medias. Incluye guía de colores Pantone y capas separadas para ajustar sponsors o números.</p>
+      <h3>Este archivo incluye</h3>
+      <ul class="includes">
+        <li>Archivo .AI editable (Illustrator)</li>
+        <li>Archivo .PSD por capas (Photoshop)</li>
+        <li>Ficha técnica en .PDF</li>
+        <li>Mockup de presentación en .PNG</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="related">
+  <div class="wrap">
+    <h2 class="display">También te puede interesar</h2>
+    <div class="grid">
+      <div class="card" style="animation-delay:.05s"><div class="card-swatch"><svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/><path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Kit Visitante Aurora</h4><div class="meta">Fútbol · Gratis</div></div>
+      <div class="card" style="animation-delay:.12s"><div class="card-swatch"><svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/><path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Kit Básquet Tigres</h4><div class="meta">Básquetbol · Gratis</div></div>
+      <div class="card" style="animation-delay:.19s"><div class="card-swatch"><svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/><path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Kit Vóley Costa</h4><div class="meta">Vóleibol · Gratis</div></div>
+      <div class="card" style="animation-delay:.26s"><div class="card-swatch"><svg class="hex-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="var(--navy-2)" stroke-width="4"/><path d="M28 38 L50 66 L76 18" fill="none" stroke="var(--orange)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Kit Alterno Fénix</h4><div class="meta">Fútbol · Gratis</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">VÉRTICE CUBE © 2026</span>
+    <div class="foot-links" style="display:flex;gap:24px;">
+      <a href="#" style="color:var(--text-dim);font-size:13px;text-decoration:none;">Términos</a>
+      <a href="#" style="color:var(--text-dim);font-size:13px;text-decoration:none;">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
