@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { publicUrl } from "@/lib/r2";
 import type { Diseno } from "@/lib/types/database";
+
+function conImagenPublica(diseno: Diseno): Diseno {
+  return { ...diseno, imagen_url: publicUrl(diseno.imagen_url) };
+}
 
 export async function getDisenosPublicados(): Promise<Diseno[]> {
   const supabase = await createClient();
@@ -15,7 +20,7 @@ export async function getDisenosPublicados(): Promise<Diseno[]> {
     return [];
   }
 
-  return data ?? [];
+  return (data ?? []).map(conImagenPublica);
 }
 
 export async function getDisenoPublicadoPorId(id: string): Promise<Diseno | null> {
@@ -32,5 +37,5 @@ export async function getDisenoPublicadoPorId(id: string): Promise<Diseno | null
     return null;
   }
 
-  return data;
+  return data ? conImagenPublica(data) : null;
 }

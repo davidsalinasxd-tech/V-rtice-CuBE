@@ -52,3 +52,11 @@ export async function deleteObject(key: string) {
   const command = new DeleteObjectCommand({ Bucket: BUCKET(), Key: key })
   await getR2Client().send(command)
 }
+
+/** URL pública (bucket con Public Access habilitado) para servir portadas del catálogo sin firmar. */
+export function publicUrl(key: string | null): string | null {
+  if (!key) return null
+  const base = process.env.R2_PUBLIC_URL
+  if (!base) return null
+  return `${base.replace(/\/$/, '')}/${key}`
+}
