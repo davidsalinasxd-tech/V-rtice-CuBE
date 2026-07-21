@@ -168,15 +168,24 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
                     {misDisenos.map((d) => (
                       <tr key={d.id} className="border-t border-line">
                         <td className="py-3.5 pr-3">
-                          <Link
-                            href={`/producto/${d.id}`}
-                            className="flex items-center gap-2.5 text-sm hover:text-orange"
-                          >
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-paper">
-                              <HexIcon className="h-4.5 w-4.5" />
-                            </span>
-                            {d.nombre}
-                          </Link>
+                          {d.estado === "publicado" ? (
+                            <Link
+                              href={`/producto/${d.id}`}
+                              className="flex items-center gap-2.5 text-sm hover:text-orange"
+                            >
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-paper">
+                                <HexIcon className="h-4.5 w-4.5" />
+                              </span>
+                              {d.nombre}
+                            </Link>
+                          ) : (
+                            <div className="flex items-center gap-2.5 text-sm text-ink">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line-strong bg-paper">
+                                <HexIcon className="h-4.5 w-4.5" />
+                              </span>
+                              {d.nombre}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3.5 pr-3">
                           <span
