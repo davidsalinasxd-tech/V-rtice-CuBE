@@ -32,8 +32,18 @@ export default async function AdminPage() {
   const previews = await Promise.all(
     disenos.map(async (d) => ({
       id: d.id,
-      imagenUrl: d.imagen_url ? await getDownloadUrl(d.imagen_url, 600).catch(() => null) : null,
-      rarUrl: d.rar_url ? await getDownloadUrl(d.rar_url, 600).catch(() => null) : null,
+      imagenUrl: d.imagen_url
+        ? await getDownloadUrl(d.imagen_url, 600).catch((e) => {
+            console.error(`admin: no se pudo firmar la imagen de ${d.id} (key: ${d.imagen_url}):`, e);
+            return null;
+          })
+        : null,
+      rarUrl: d.rar_url
+        ? await getDownloadUrl(d.rar_url, 600).catch((e) => {
+            console.error(`admin: no se pudo firmar el rar de ${d.id} (key: ${d.rar_url}):`, e);
+            return null;
+          })
+        : null,
     }))
   );
   const previewPorId = new Map(previews.map((p) => [p.id, p]));
