@@ -3,16 +3,19 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const MAX_RAR_BYTES = 50 * 1024 * 1024;
+const MAX_IMG_BYTES = 3 * 1024 * 1024;
+
 export function UploadForm() {
   const router = useRouter();
   const [esGratis, setEsGratis] = useState(true);
   const [precio, setPrecio] = useState("");
   const [autoria, setAutoria] = useState(false);
+  const [rarFile, setRarFile] = useState<File | null>(null);
+  const [imgFile, setImgFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const rarInput = useRef<HTMLInputElement>(null);
-  const imgInput = useRef<HTMLInputElement>(null);
 
   const neto = precio ? Math.round(parseInt(precio, 10) * 0.8) : 0;
 
@@ -46,8 +49,6 @@ export function UploadForm() {
       const nombre = String(formData.get("nombre") ?? "");
       const deporte = String(formData.get("deporte") ?? "");
       const formato = String(formData.get("formato") ?? "");
-      const rarFile = rarInput.current?.files?.[0];
-      const imgFile = imgInput.current?.files?.[0];
 
       if (!nombre || !deporte) throw new Error("Completá nombre y deporte.");
       if (!autoria) throw new Error("Confirmá la autoría del diseño.");
@@ -82,11 +83,11 @@ export function UploadForm() {
       });
       if (!patchRes.ok) throw new Error("El diseño se creó pero no se pudieron guardar los archivos.");
 
-      setSuccess("Diseño enviado a revisión.");
+      setSuccess("¡Listo! Diseño enviado a revisión.");
       setPrecio("");
       setAutoria(false);
-      if (rarInput.current) rarInput.current.value = "";
-      if (imgInput.current) imgInput.current.value = "";
+      setRarFile(null);
+      setImgFile(null);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error inesperado.");
@@ -98,28 +99,24 @@ export function UploadForm() {
   return (
     <form action={handleSubmit} className="flex flex-col gap-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <label
-          htmlFor="rar-input"
-          className="cursor-pointer rounded-md border-1.5 border-dashed border-line-strong px-5 py-7 text-center transition-colors hover:border-orange hover:bg-orange/5"
-        >
-          <div className="mx-auto mb-3.5 flex h-10 w-10 items-center justify-center rounded-md border-1.5 border-line-strong font-mono text-[11px] text-text-dim">
-            .RAR
-          </div>
-          <p className="mb-1 text-sm">Arrastrá el archivo .rar acá, o hacé clic para buscarlo</p>
-          <span className="text-xs text-text-dim">Máx. 50 MB · incluí AI, PSD o PDF dentro del .rar</span>
-          <input ref={rarInput} id="rar-input" type="file" accept=".rar" className="hidden" />
-        </label>
-        <label
-          htmlFor="img-input"
-          className="cursor-pointer rounded-md border-1.5 border-dashed border-line-strong px-5 py-7 text-center transition-colors hover:border-orange hover:bg-orange/5"
-        >
-          <div className="mx-auto mb-3.5 flex h-10 w-10 items-center justify-center rounded-md border-1.5 border-line-strong font-mono text-[11px] text-text-dim">
-            IMG
-          </div>
-          <p className="mb-1 text-sm">Arrastrá tu imagen ya exportada con el marco</p>
-          <span className="text-xs text-text-dim">JPG · máx. 3 MB · sin el marco oficial no se aprueba</span>
-          <input ref={imgInput} id="img-input" type="file" accept="image/*" className="hidden" />
-        </label>
+        <FileDropzone
+          etiqueta=".RAR"
+          instrucciones="Arrastrá el archivo .rar acá, o hacé clic para buscarlo"
+          hint="Máx. 50 MB · incluí AI, PSD o PDF dentro del .rar"
+          accept=".rar"
+          maxBytes={MAX_RAR_BYTES}
+          file={rarFile}
+          onFile={setRarFile}
+        />
+        <FileDropzone
+          etiqueta="IMG"
+          instrucciones="Arrastrá tu imagen ya exportada con el marco"
+          hint="JPG · máx. 3 MB · sin el marco oficial no se aprueba"
+          accept="image/*"
+          maxBytes={MAX_IMG_BYTES}
+          file={imgFile}
+          onFile={setImgFile}
+        />
       </div>
 
       <a href="/plantilla-marco-oficial.rar" download className="flex items-center gap-2 text-[13px] text-navy-2 hover:text-ink">
@@ -203,6 +200,94 @@ export function UploadForm() {
         {submitting ? "Publicando…" : "Publicar diseño"}
       </button>
     </form>
+  );
+}
+
+function formatBytes(bytes: number) {
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` : `${Math.round(bytes / 1024)} KB`;
+}
+
+function FileDropzone({
+  etiqueta,
+  instrucciones,
+  hint,
+  accept,
+  maxBytes,
+  file,
+  onFile,
+}: {
+  etiqueta: string;
+  instrucciones: string;
+  hint: string;
+  accept: string;
+  maxBytes: number;
+  file: File | null;
+  onFile: (file: File) => void;
+}) {
+  const [dragOver, setDragOver] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function procesarArchivo(f: File | undefined) {
+    if (!f) return;
+    if (f.size > maxBytes) {
+      setLocalError(`Supera el máximo de ${formatBytes(maxBytes)}.`);
+      return;
+    }
+    setLocalError(null);
+    onFile(f);
+  }
+
+  return (
+    <div>
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          procesarArchivo(e.dataTransfer.files?.[0]);
+        }}
+        className={`cursor-pointer rounded-md border-1.5 border-dashed px-5 py-7 text-center transition-colors ${
+          dragOver
+            ? "border-orange bg-orange/5"
+            : file
+              ? "border-navy-2 bg-navy/5"
+              : "border-line-strong hover:border-orange hover:bg-orange/5"
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => procesarArchivo(e.target.files?.[0])}
+        />
+
+        {file ? (
+          <>
+            <div className="mx-auto mb-3.5 flex h-10 w-10 items-center justify-center rounded-md border-1.5 border-navy-2 text-navy-2">
+              ✓
+            </div>
+            <p className="mb-1 truncate text-sm font-semibold text-navy">{file.name}</p>
+            <span className="text-xs text-text-dim">{formatBytes(file.size)} · tocá para cambiar el archivo</span>
+          </>
+        ) : (
+          <>
+            <div className="mx-auto mb-3.5 flex h-10 w-10 items-center justify-center rounded-md border-1.5 border-line-strong font-mono text-[11px] text-text-dim">
+              {etiqueta}
+            </div>
+            <p className="mb-1 text-sm">{instrucciones}</p>
+            <span className="text-xs text-text-dim">{hint}</span>
+          </>
+        )}
+      </div>
+      {localError && <p className="mt-1.5 text-xs text-orange">{localError}</p>}
+    </div>
   );
 }
 
