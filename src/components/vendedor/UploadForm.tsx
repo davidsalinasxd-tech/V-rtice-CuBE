@@ -122,11 +122,11 @@ export function UploadForm() {
         </label>
       </div>
 
-      <a href="/plantilla-imagen-portada.png" download className="flex items-center gap-2 text-[13px] text-navy-2 hover:text-ink">
+      <a href="/plantilla-marco-oficial.rar" download className="flex items-center gap-2 text-[13px] text-navy-2 hover:text-ink">
         <span className="rounded-sm border border-line-strong bg-white px-1.75 py-0.75 font-mono text-[11px] text-text-dim">
-          .PNG
+          .RAR
         </span>
-        Descargar plantilla oficial del marco →
+        Descargar plantilla oficial del marco (CDR + PDF) →
       </a>
 
       <div className="flex w-fit gap-0.5 rounded-[3px] border border-line-strong bg-paper p-0.5">
