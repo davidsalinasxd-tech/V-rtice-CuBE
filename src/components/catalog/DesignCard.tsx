@@ -44,7 +44,7 @@ export function DesignCard({ diseno, index }: { diseno: Diseno; index: number })
         )}
       </div>
 
-      <div className="mb-4 flex h-30 items-center justify-center overflow-hidden rounded-md border border-line bg-paper">
+      <div className="mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border border-line bg-paper">
         {diseno.imagen_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={diseno.imagen_url} alt={diseno.nombre} className="h-full w-full object-contain" />
