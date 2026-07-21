@@ -3,6 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { deleteObject } from "@/lib/r2";
 
+function mensajeDeError(message: string) {
+  if (message.includes("Cannot coerce the result to a single JSON object")) {
+    return "No se pudo actualizar el diseño: falta permiso de administrador (RLS) en la tabla disenos.";
+  }
+  return message;
+}
+
 export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/disenos/[id]">) {
   const { id } = await ctx.params;
   const supabase = await createClient();
@@ -39,7 +46,7 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: mensajeDeError(error.message) }, { status: 500 });
     return NextResponse.json({ diseno: data });
   }
 
@@ -56,6 +63,6 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: mensajeDeError(error.message) }, { status: 500 });
   return NextResponse.json({ diseno: data });
 }
