@@ -20,6 +20,9 @@ function getR2Client() {
         accessKeyId: process.env.R2_ACCESS_KEY_ID!,
         secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
       },
+      // El SDK agrega por defecto un checksum a la firma que un PUT plano desde
+      // el navegador no puede replicar, y R2 responde 403. Lo desactivamos.
+      requestChecksumCalculation: 'WHEN_REQUIRED',
     })
   }
   return client
