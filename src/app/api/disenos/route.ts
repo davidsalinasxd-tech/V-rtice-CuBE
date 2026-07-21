@@ -18,7 +18,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
-  await ensurePerfil(supabase, user);
+  const { error: perfilError } = await ensurePerfil(supabase, user);
+  if (perfilError) {
+    return NextResponse.json(
+      { error: "No se pudo preparar tu perfil de vendedor. Probá cerrar sesión y volver a entrar; si sigue fallando, avisá al administrador." },
+      { status: 500 }
+    );
+  }
 
   const body = await request.json();
   const { nombre, deporte, formato, esGratis, precio, autoriaConfirmada } = body as {

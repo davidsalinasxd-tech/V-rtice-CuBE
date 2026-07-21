@@ -9,5 +9,13 @@ import type { Database, Rol } from "@/lib/types/database";
 export async function ensurePerfil(supabase: SupabaseClient<Database>, user: User) {
   const nombre = (user.user_metadata?.nombre as string | undefined) ?? user.email ?? "usuario";
   const rol = (user.user_metadata?.rol as Rol | undefined) ?? "comprador";
-  await supabase.from("perfiles").upsert({ id: user.id, nombre, rol }, { onConflict: "id", ignoreDuplicates: true });
+  const { error } = await supabase
+    .from("perfiles")
+    .upsert({ id: user.id, nombre, rol }, { onConflict: "id", ignoreDuplicates: true });
+
+  if (error) {
+    console.error("ensurePerfil: no se pudo crear/actualizar el perfil:", error.message);
+  }
+
+  return { error };
 }
