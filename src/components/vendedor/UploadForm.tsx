@@ -162,7 +162,11 @@ export function UploadForm() {
             />
           </div>
         )}
-        <SelectField label="Formatos incluidos" name="formato" options={["AI + PSD + PDF", "AI + PSD", "Solo PSD"]} />
+        <SelectField
+          label="Formatos incluidos"
+          name="formato"
+          options={["AI + PSD + PDF", "AI + PSD", "CDR + PDF", "AI + PSD + CDR + PDF", "Solo PSD", "Solo CDR"]}
+        />
       </div>
 
       {!esGratis ? (

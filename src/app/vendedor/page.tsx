@@ -5,6 +5,7 @@ import { HexIcon } from "@/components/HexIcon";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
 import { createClient } from "@/lib/supabase/server";
+import { ensurePerfil } from "@/lib/supabase/perfil";
 import { cerrarSesion } from "@/app/actions/auth";
 import { R2_LIMITS } from "@/lib/r2";
 
@@ -33,6 +34,8 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/registro");
+
+  await ensurePerfil(supabase, user);
 
   const [{ data: perfil }, { data: disenos }, { data: metodo }] = await Promise.all([
     supabase.from("perfiles").select("*").eq("id", user.id).maybeSingle(),

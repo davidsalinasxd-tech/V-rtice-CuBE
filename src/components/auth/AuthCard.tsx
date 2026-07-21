@@ -3,11 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ensurePerfil } from "@/lib/supabase/perfil";
 import type { Rol } from "@/lib/types/database";
-
-async function asegurarPerfil(supabase: ReturnType<typeof createClient>, userId: string, nombre: string, rol: Rol) {
-  await supabase.from("perfiles").upsert({ id: userId, nombre, rol }, { onConflict: "id", ignoreDuplicates: true });
-}
 
 export function AuthCard() {
   const [tab, setTab] = useState<"crear" | "entrar">("crear");
@@ -43,7 +40,7 @@ export function AuthCard() {
     }
 
     if (data.user && data.session) {
-      await asegurarPerfil(supabase, data.user.id, nombre, rol);
+      await ensurePerfil(supabase, data.user);
       router.push(rol === "vendedor" || rol === "ambos" ? "/vendedor" : "/");
       router.refresh();
       return;
@@ -77,9 +74,7 @@ export function AuthCard() {
     }
 
     if (data.user) {
-      const metaNombre = (data.user.user_metadata?.nombre as string | undefined) ?? email;
-      const metaRol = (data.user.user_metadata?.rol as Rol | undefined) ?? "comprador";
-      await asegurarPerfil(supabase, data.user.id, metaNombre, metaRol);
+      await ensurePerfil(supabase, data.user);
     }
 
     router.push("/");

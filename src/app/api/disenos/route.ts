@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ensurePerfil } from "@/lib/supabase/perfil";
 import { R2_LIMITS } from "@/lib/r2";
 
 const inicioDeMes = () => {
@@ -16,6 +17,8 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
+
+  await ensurePerfil(supabase, user);
 
   const body = await request.json();
   const { nombre, deporte, formato, esGratis, precio, autoriaConfirmada } = body as {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { ensurePerfil } from "@/lib/supabase/perfil";
 
 export function CuentaConfirmadaMessage() {
   const [checking, setChecking] = useState(true);
@@ -10,7 +11,10 @@ export function CuentaConfirmadaMessage() {
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session?.user) {
+        await ensurePerfil(supabase, data.session.user);
+      }
       setConfirmado(!!data.session);
       setChecking(false);
     });
