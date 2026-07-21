@@ -30,7 +30,7 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
           <div className="relative flex h-90 items-center justify-center overflow-hidden rounded-md border border-dashed border-line-strong bg-paper">
             {diseno.imagen_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={diseno.imagen_url} alt={diseno.nombre} className="h-full w-full object-cover" />
+              <img src={diseno.imagen_url} alt={diseno.nombre} className="h-full w-full object-contain" />
             ) : (
               <>
                 <HexIcon className="h-47.5 w-47.5" />
