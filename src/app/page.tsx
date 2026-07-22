@@ -4,6 +4,7 @@ import { HexIcon } from "@/components/HexIcon";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
 import { getDisenosPublicados } from "@/lib/supabase/queries";
 import { disenosDeEjemplo } from "@/lib/seed-data";
+import { TELEGRAM_URL } from "@/lib/telegram";
 
 export default async function Home() {
   const disenos = await getDisenosPublicados();
@@ -117,12 +118,14 @@ export default async function Home() {
             <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
               Términos
             </Link>
-            <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
-              Contacto
-            </Link>
-            <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
-              Soporte
-            </Link>
+            <a
+              href={TELEGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[13px] text-text-dim hover:text-navy"
+            >
+              Contacto / Soporte
+            </a>
           </div>
         </div>
       </footer>

@@ -5,6 +5,7 @@ import { HexIcon } from "@/components/HexIcon";
 import { DownloadButton } from "@/components/catalog/DownloadButton";
 import { codigoDeDiseno } from "@/lib/codigo";
 import { getDisenoPublicadoPorId } from "@/lib/supabase/queries";
+import { TELEGRAM_URL } from "@/lib/telegram";
 
 export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
   const { id } = await props.params;
@@ -66,7 +67,13 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
                 {diseno.es_gratis ? "Gratis" : `Gs. ${diseno.precio.toLocaleString("es-PY")}`}
               </span>
             </div>
-            <DownloadButton disenoId={diseno.id} esGratis={diseno.es_gratis} />
+            <DownloadButton
+              disenoId={diseno.id}
+              esGratis={diseno.es_gratis}
+              codigo={codigo}
+              nombre={diseno.nombre}
+              precio={diseno.precio}
+            />
           </div>
 
           <div>
@@ -94,9 +101,9 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
             <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
               Términos
             </Link>
-            <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
-              Contacto
-            </Link>
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-[13px] text-text-dim hover:text-navy">
+              Contacto / Soporte
+            </a>
           </div>
         </div>
       </footer>
