@@ -9,6 +9,12 @@ export const R2_LIMITS = {
   DISENOS_APROBADOS_PARA_COBRO: 10,
 } as const
 
+export const SUSCRIPCION = {
+  PRECIO_MENSUAL: 50000,
+  MAX_DESCARGAS_EXTERNAS_POR_MES: 10,
+  MAX_DESCARGAS_EXTERNAS_POR_DIA: 5,
+} as const
+
 let client: S3Client | null = null
 
 function getR2Client() {

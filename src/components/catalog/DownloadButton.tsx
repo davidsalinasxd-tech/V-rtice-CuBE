@@ -6,20 +6,30 @@ import { linkTelegramCompra } from "@/lib/telegram";
 export function DownloadButton({
   disenoId,
   esGratis,
+  esOficial,
+  suscripcionActiva,
+  cupoExternoDisponible,
   codigo,
   nombre,
   precio,
 }: {
   disenoId: string;
   esGratis: boolean;
+  esOficial: boolean;
+  suscripcionActiva: boolean;
+  cupoExternoDisponible: boolean;
   codigo: string;
   nombre: string;
   precio: number;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forzarTelegram, setForzarTelegram] = useState(false);
 
-  if (!esGratis) {
+  const cubiertoPorSuscripcion = suscripcionActiva && (esOficial || cupoExternoDisponible);
+  const descargaDirecta = esGratis || cubiertoPorSuscripcion;
+
+  if (!descargaDirecta || forzarTelegram) {
     return (
       <div>
         <a
@@ -31,8 +41,9 @@ export function DownloadButton({
           Coordinar pago por Telegram →
         </a>
         <p className="mt-3.5 text-xs leading-relaxed text-text-dim">
-          Le escribís a Vértice Cube por Telegram, te pasamos los datos para transferir, y en cuanto confirmamos
-          el pago te mandamos el archivo por ahí mismo.
+          {forzarTelegram && error
+            ? error
+            : "Le escribís a Vértice Cube por Telegram, te pasamos los datos para transferir, y en cuanto confirmamos el pago te mandamos el archivo por ahí mismo."}
         </p>
       </div>
     );
@@ -48,7 +59,14 @@ export function DownloadButton({
         body: JSON.stringify({ disenoId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "No se pudo generar el link de descarga.");
+      if (!res.ok) {
+        if (res.status === 403) {
+          setError(json.error ?? "No se pudo generar el link de descarga.");
+          setForzarTelegram(true);
+          return;
+        }
+        throw new Error(json.error ?? "No se pudo generar el link de descarga.");
+      }
       window.location.href = json.url;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error inesperado.");
@@ -71,7 +89,7 @@ export function DownloadButton({
       ) : (
         <p className="mt-3.5 flex items-center gap-2 text-xs text-text-dim">
           <span className="h-1.5 w-1.5 rounded-full bg-orange" />
-          El link de descarga se habilita al instante
+          {esGratis ? "El link de descarga se habilita al instante" : "Incluido en tu suscripción"}
         </p>
       )}
     </div>

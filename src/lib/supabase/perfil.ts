@@ -11,7 +11,7 @@ export async function ensurePerfil(supabase: SupabaseClient<Database>, user: Use
   const rol = (user.user_metadata?.rol as Rol | undefined) ?? "comprador";
   const { error } = await supabase
     .from("perfiles")
-    .upsert({ id: user.id, nombre, rol }, { onConflict: "id", ignoreDuplicates: true });
+    .upsert({ id: user.id, nombre, email: user.email ?? null, rol }, { onConflict: "id", ignoreDuplicates: true });
 
   if (error) {
     console.error("ensurePerfil: no se pudo crear/actualizar el perfil:", error.message);

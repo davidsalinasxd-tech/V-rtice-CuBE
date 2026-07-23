@@ -5,6 +5,8 @@ import { HexIcon } from "@/components/HexIcon";
 import { DownloadButton } from "@/components/catalog/DownloadButton";
 import { codigoDeDiseno } from "@/lib/codigo";
 import { getDisenoPublicadoPorId } from "@/lib/supabase/queries";
+import { getEstadoSuscripcion, getCupoDescargaExterna } from "@/lib/supabase/subscription";
+import { createClient } from "@/lib/supabase/server";
 import { TELEGRAM_URL } from "@/lib/telegram";
 
 export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
@@ -14,6 +16,17 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
   if (!diseno) notFound();
 
   const codigo = codigoDeDiseno(diseno.id);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const estadoSuscripcion = user ? await getEstadoSuscripcion(supabase, user.id) : { activa: false, vence: null };
+  const cupoExterno =
+    user && estadoSuscripcion.activa && !diseno.es_oficial
+      ? await getCupoDescargaExterna(supabase, user.id)
+      : null;
 
   return (
     <>
@@ -70,6 +83,9 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
             <DownloadButton
               disenoId={diseno.id}
               esGratis={diseno.es_gratis}
+              esOficial={diseno.es_oficial}
+              suscripcionActiva={estadoSuscripcion.activa}
+              cupoExternoDisponible={cupoExterno?.disponible ?? false}
               codigo={codigo}
               nombre={diseno.nombre}
               precio={diseno.precio}

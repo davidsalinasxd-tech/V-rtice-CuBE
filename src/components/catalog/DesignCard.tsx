@@ -68,6 +68,9 @@ export function DesignCard({ diseno, index }: { diseno: Diseno; index: number })
           {esGratis ? "Descargar" : "Comprar"}
         </span>
       </div>
+      {diseno.es_pro && (
+        <div className="mt-2.5 text-[11px] font-semibold text-orange">★ Incluido con la suscripción</div>
+      )}
     </Link>
   );
 }

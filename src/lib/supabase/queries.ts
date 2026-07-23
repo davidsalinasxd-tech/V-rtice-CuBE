@@ -58,3 +58,22 @@ export async function getDisenoMasDescargado(): Promise<Diseno | null> {
   const [topId] = [...conteos.entries()].sort((a, b) => b[1] - a[1])[0] ?? [];
   return topId ? getDisenoPublicadoPorId(topId) : null;
 }
+
+/** Cantidad de descargas registradas por cada uno de los diseños dados. */
+export async function getConteoDescargasPorDisenos(disenoIds: string[]): Promise<Map<string, number>> {
+  if (disenoIds.length === 0) return new Map();
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("descargas").select("diseno_id").in("diseno_id", disenoIds);
+
+  if (error || !data) {
+    if (error) console.error("Error al leer descargas por diseño:", error.message);
+    return new Map();
+  }
+
+  const conteos = new Map<string, number>();
+  for (const { diseno_id } of data) {
+    conteos.set(diseno_id, (conteos.get(diseno_id) ?? 0) + 1);
+  }
+  return conteos;
+}

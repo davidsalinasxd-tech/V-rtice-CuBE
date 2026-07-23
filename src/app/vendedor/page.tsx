@@ -6,6 +6,7 @@ import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
 import { createClient } from "@/lib/supabase/server";
 import { ensurePerfil } from "@/lib/supabase/perfil";
+import { getConteoDescargasPorDisenos } from "@/lib/supabase/queries";
 import { cerrarSesion } from "@/app/actions/auth";
 import { R2_LIMITS } from "@/lib/r2";
 
@@ -44,6 +45,8 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
   ]);
 
   const misDisenos = disenos ?? [];
+  const conteoDescargas =
+    tab === "disenos" ? await getConteoDescargasPorDisenos(misDisenos.map((d) => d.id)) : new Map<string, number>();
   const aprobados = misDisenos.filter((d) => d.estado === "publicado").length;
   const enRevision = misDisenos.filter((d) => d.estado === "revision").length;
   const faltan = Math.max(0, R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO - aprobados);
@@ -161,6 +164,7 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
                     <tr>
                       <Th>Diseño</Th>
                       <Th>Estado</Th>
+                      <Th align="right">Descargas</Th>
                       <Th align="right">Precio</Th>
                     </tr>
                   </thead>
@@ -199,6 +203,9 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
                           >
                             {ESTADO_LABEL[d.estado]}
                           </span>
+                        </td>
+                        <td className="py-3.5 text-right font-mono text-sm text-navy-2">
+                          {conteoDescargas.get(d.id) ?? 0}
                         </td>
                         <td className="py-3.5 text-right font-mono text-sm">
                           {d.es_gratis ? "Gratis" : `Gs. ${d.precio.toLocaleString("es-PY")}`}

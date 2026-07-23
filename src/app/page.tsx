@@ -4,7 +4,8 @@ import { HeroShowcase } from "@/components/HeroShowcase";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
 import { getDisenosPublicados, getDisenoMasDescargado } from "@/lib/supabase/queries";
 import { disenosDeEjemplo } from "@/lib/seed-data";
-import { TELEGRAM_URL } from "@/lib/telegram";
+import { TELEGRAM_URL, linkTelegramSuscripcion } from "@/lib/telegram";
+import { SUSCRIPCION } from "@/lib/r2";
 
 export default async function Home() {
   const disenos = await getDisenosPublicados();
@@ -21,6 +22,16 @@ export default async function Home() {
   return (
     <>
       <PublicNav />
+
+      <a
+        href={linkTelegramSuscripcion()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 bg-navy px-4 py-2.5 text-center text-[13px] font-semibold text-white transition-colors hover:bg-navy-2"
+      >
+        ✨ Nuevo: suscripción mensual — PRO ilimitado + 10 descargas externas por Gs.{" "}
+        {SUSCRIPCION.PRECIO_MENSUAL.toLocaleString("es-PY")}/mes · Suscribirme →
+      </a>
 
       <section className="relative overflow-hidden border-b border-line py-25 pb-29">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-8 md:grid-cols-[1.15fr_0.85fr]">
@@ -45,7 +56,7 @@ export default async function Home() {
                 Ver catálogo →
               </Link>
               <Link
-                href="#vender"
+                href="/vendedor"
                 className="rounded-[3px] border-1.5 border-line-strong bg-white px-6.5 py-4 text-[15px] font-semibold text-navy transition-colors hover:border-navy hover:bg-paper"
               >
                 Vender mis diseños
@@ -81,22 +92,30 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-t border-line bg-navy py-20" id="vender">
+      <section className="relative overflow-hidden border-t border-line bg-navy py-20" id="suscripcion">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-10 px-8 md:flex-row md:items-center">
           <div>
+            <span className="mb-3 block font-mono text-xs font-bold tracking-widest text-orange uppercase">
+              Suscripción mensual
+            </span>
             <h2 className="font-display max-w-120 text-[30px] leading-tight text-white">
-              ¿Diseñás kits deportivos?
+              Acceso ilimitado a diseños PRO
             </h2>
-            <p className="mt-3 max-w-110 text-[15px] text-white/70">
-              Subí tus archivos y sumá tu trabajo al catálogo. La venta con comisión llega pronto.
+            <p className="mt-3 max-w-125 text-[15px] text-white/70">
+              Por Gs. {SUSCRIPCION.PRECIO_MENSUAL.toLocaleString("es-PY")}/mes descargás sin límite todos los diseños
+              PRO/oficiales, más {SUSCRIPCION.MAX_DESCARGAS_EXTERNAS_POR_MES} descargas de diseños de vendedores
+              externos por mes (hasta {SUSCRIPCION.MAX_DESCARGAS_EXTERNAS_POR_DIA} por día). Si se agota el cupo,
+              seguís pudiendo comprar diseños individuales.
             </p>
           </div>
-          <Link
-            href="/registro"
+          <a
+            href={linkTelegramSuscripcion()}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-[3px] bg-orange px-6.5 py-4 text-[15px] font-bold text-white transition-all hover:gap-3 hover:bg-orange-2"
           >
-            Empezar a vender →
-          </Link>
+            Suscribirme →
+          </a>
         </div>
       </section>
 

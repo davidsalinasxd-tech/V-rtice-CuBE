@@ -4,7 +4,11 @@ export type EstadoDiseno = 'revision' | 'publicado' | 'rechazado'
 export type Perfil = {
   id: string
   nombre: string
+  email: string | null
   rol: Rol
+  es_suscriptor: boolean
+  suscripcion_vence: string | null
+  es_admin: boolean
   created_at: string
 }
 
@@ -30,6 +34,8 @@ export type Descarga = {
   diseno_id: string
   usuario_id: string | null
   precio_pagado: number
+  via_suscripcion: boolean
+  cuenta_para_pago: boolean
   created_at: string
 }
 
