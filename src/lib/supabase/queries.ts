@@ -39,3 +39,22 @@ export async function getDisenoPublicadoPorId(id: string): Promise<Diseno | null
 
   return data ? conImagenPublica(data) : null;
 }
+
+/** Diseño publicado con más descargas registradas en la tabla `descargas`. */
+export async function getDisenoMasDescargado(): Promise<Diseno | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("descargas").select("diseno_id");
+
+  if (error || !data || data.length === 0) {
+    if (error) console.error("Error al leer descargas:", error.message);
+    return null;
+  }
+
+  const conteos = new Map<string, number>();
+  for (const { diseno_id } of data) {
+    conteos.set(diseno_id, (conteos.get(diseno_id) ?? 0) + 1);
+  }
+
+  const [topId] = [...conteos.entries()].sort((a, b) => b[1] - a[1])[0] ?? [];
+  return topId ? getDisenoPublicadoPorId(topId) : null;
+}

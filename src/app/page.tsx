@@ -1,14 +1,22 @@
 import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
-import { HexIcon } from "@/components/HexIcon";
+import { HeroShowcase } from "@/components/HeroShowcase";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
-import { getDisenosPublicados } from "@/lib/supabase/queries";
+import { getDisenosPublicados, getDisenoMasDescargado } from "@/lib/supabase/queries";
 import { disenosDeEjemplo } from "@/lib/seed-data";
 import { TELEGRAM_URL } from "@/lib/telegram";
 
 export default async function Home() {
   const disenos = await getDisenosPublicados();
   const catalogo = disenos.length > 0 ? disenos : disenosDeEjemplo;
+
+  const novedad = [...catalogo].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )[0];
+  const masDescargado =
+    (disenos.length > 0 ? await getDisenoMasDescargado() : null) ??
+    catalogo.find((d) => d.id !== novedad.id) ??
+    novedad;
 
   return (
     <>
@@ -45,26 +53,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative rounded-lg border border-line bg-white p-7 shadow-[0_24px_48px_rgba(0,47,89,0.08)]">
-            <div className="mb-5 flex items-start justify-between">
-              <div className="font-mono text-[11px] text-text-dim">KIT-0142 · LOCAL</div>
-              <span className="rounded-sm bg-navy/8 px-2.5 py-1.5 font-mono text-[11px] font-bold text-navy uppercase">
-                Gratis
-              </span>
-            </div>
-            <div className="relative mb-4.5 flex h-50 items-center justify-center rounded-md border border-dashed border-line-strong bg-paper">
-              <HexIcon className="h-24 w-24" />
-              <span className="absolute bottom-3 font-mono text-[10px] tracking-wide text-text-dim uppercase">
-                Vista previa del diseño
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5 border-t border-line pt-4">
-              <Spec label="Deporte" value="Fútbol 11" />
-              <Spec label="Formato" value=".RAR · AI/PSD" mono />
-              <Spec label="Resolución" value="300 DPI" />
-              <Spec label="Precio" value="Gratis" mono />
-            </div>
-          </div>
+          <HeroShowcase novedad={novedad} masDescargado={masDescargado} />
         </div>
       </section>
 
@@ -130,15 +119,6 @@ export default async function Home() {
         </div>
       </footer>
     </>
-  );
-}
-
-function Spec({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div>
-      <div className="mb-0.5 text-[10px] tracking-wide text-text-dim uppercase">{label}</div>
-      <div className={`text-[13px] font-semibold text-navy ${mono ? "font-mono" : ""}`}>{value}</div>
-    </div>
   );
 }
 
