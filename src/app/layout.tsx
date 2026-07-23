@@ -20,13 +20,46 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["500", "700"],
 });
 
+const SITE_URL = "https://verticecube.com";
+const SITE_TITLE = "Vértice Cube — Diseños vector gratis para sublimación";
+const SITE_DESCRIPTION =
+  "Diseños vector gratis y PRO para sublimación: kits de fútbol, básquet y vóley en AI, PSD y PDF, listos para imprimir. Descargá gratis o suscribite para acceso ilimitado.";
+
 export const metadata: Metadata = {
-  title: "VÉRTICE CUBE — Diseños deportivos para sublimación",
-  description:
-    "Marketplace de diseños deportivos para sublimación: kits y camisetas en formato .rar, descargas gratis y diseños PRO.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: "%s | Vértice Cube",
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "vector gratis",
+    "diseños deportivos vector",
+    "kits de fútbol vector",
+    "camisetas sublimación vector",
+    "diseños para sublimar",
+    "plantillas camisetas fútbol",
+    "vector básquet",
+    "vector vóley",
+  ],
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_PY",
+    url: SITE_URL,
+    siteName: "Vértice Cube",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/logo-full.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/logo-full.png"],
   },
 };
 

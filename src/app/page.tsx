@@ -4,8 +4,7 @@ import { HeroShowcase } from "@/components/HeroShowcase";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
 import { getDisenosPublicados, getDisenoMasDescargado } from "@/lib/supabase/queries";
 import { disenosDeEjemplo } from "@/lib/seed-data";
-import { TELEGRAM_URL, linkTelegramSuscripcion } from "@/lib/telegram";
-import { SUSCRIPCION } from "@/lib/r2";
+import { TELEGRAM_URL } from "@/lib/telegram";
 
 export default async function Home() {
   const disenos = await getDisenosPublicados();
@@ -23,15 +22,12 @@ export default async function Home() {
     <>
       <PublicNav />
 
-      <a
-        href={linkTelegramSuscripcion()}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href="/suscripcion"
         className="flex items-center justify-center gap-2 bg-navy px-4 py-2.5 text-center text-[13px] font-semibold text-white transition-colors hover:bg-navy-2"
       >
-        ✨ Nuevo: suscripción mensual — PRO ilimitado + 10 descargas externas por Gs.{" "}
-        {SUSCRIPCION.PRECIO_MENSUAL.toLocaleString("es-PY")}/mes · Suscribirme →
-      </a>
+        🔥 ¿Cansado de coordinar pago por cada diseño? Hay una forma de tener acceso ilimitado →
+      </Link>
 
       <section className="relative overflow-hidden border-b border-line py-25 pb-29">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-8 md:grid-cols-[1.15fr_0.85fr]">
@@ -50,10 +46,10 @@ export default async function Home() {
             </p>
             <div className="flex flex-wrap gap-3.5">
               <Link
-                href="#catalogo"
-                className="inline-flex items-center gap-2 rounded-[3px] bg-orange px-6.5 py-4 text-[15px] font-bold text-white transition-all hover:gap-3 hover:bg-orange-2"
+                href="/suscripcion"
+                className="btn-shine inline-flex items-center gap-2 rounded-[3px] bg-orange px-6.5 py-4 text-[15px] font-bold text-white transition-all hover:gap-3 hover:bg-orange-2"
               >
-                Ver catálogo →
+                Suscribirme →
               </Link>
               <Link
                 href="/vendedor"
@@ -69,6 +65,16 @@ export default async function Home() {
       </section>
 
       <CatalogSection disenos={catalogo} />
+
+      <section className="border-t border-line bg-paper py-10">
+        <div className="mx-auto max-w-4xl px-8 text-center">
+          <p className="text-[13px] leading-relaxed text-text-dim">
+            En Vértice Cube encontrás diseños vector gratis y PRO para sublimación: kits de fútbol, básquet y
+            vóley en formato AI, PSD y PDF, listos para imprimir. Bajá plantillas de camisetas y kits deportivos
+            en vector sin costo, o accedé a diseños PRO exclusivos con la suscripción mensual.
+          </p>
+        </div>
+      </section>
 
       <section className="border-t border-line py-22" id="como-funciona">
         <div className="mx-auto max-w-6xl px-8">
@@ -92,30 +98,19 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-t border-line bg-navy py-20" id="suscripcion">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-10 px-8 md:flex-row md:items-center">
+      <section className="relative overflow-hidden border-t border-line bg-navy py-14">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-8 md:flex-row md:items-center">
           <div>
-            <span className="mb-3 block font-mono text-xs font-bold tracking-widest text-orange uppercase">
-              Suscripción mensual
-            </span>
-            <h2 className="font-display max-w-120 text-[30px] leading-tight text-white">
-              Acceso ilimitado a diseños PRO
+            <h2 className="font-display max-w-120 text-[22px] leading-tight text-white">
+              ¿Descargás diseños PRO seguido? Salís ganando con la suscripción.
             </h2>
-            <p className="mt-3 max-w-125 text-[15px] text-white/70">
-              Por Gs. {SUSCRIPCION.PRECIO_MENSUAL.toLocaleString("es-PY")}/mes descargás sin límite todos los diseños
-              PRO/oficiales, más {SUSCRIPCION.MAX_DESCARGAS_EXTERNAS_POR_MES} descargas de diseños de vendedores
-              externos por mes (hasta {SUSCRIPCION.MAX_DESCARGAS_EXTERNAS_POR_DIA} por día). Si se agota el cupo,
-              seguís pudiendo comprar diseños individuales.
-            </p>
           </div>
-          <a
-            href={linkTelegramSuscripcion()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-[3px] bg-orange px-6.5 py-4 text-[15px] font-bold text-white transition-all hover:gap-3 hover:bg-orange-2"
+          <Link
+            href="/suscripcion"
+            className="btn-shine inline-flex shrink-0 items-center gap-2 rounded-[3px] bg-orange px-6.5 py-4 text-[15px] font-bold text-white transition-all hover:gap-3 hover:bg-orange-2"
           >
-            Suscribirme →
-          </a>
+            Suscribirte →
+          </Link>
         </div>
       </section>
 

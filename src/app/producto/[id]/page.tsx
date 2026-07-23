@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/PublicNav";
 import { HexIcon } from "@/components/HexIcon";
@@ -8,6 +9,24 @@ import { getDisenoPublicadoPorId } from "@/lib/supabase/queries";
 import { getEstadoSuscripcion, getCupoDescargaExterna } from "@/lib/supabase/subscription";
 import { createClient } from "@/lib/supabase/server";
 import { TELEGRAM_URL } from "@/lib/telegram";
+
+export async function generateMetadata(props: PageProps<"/producto/[id]">): Promise<Metadata> {
+  const { id } = await props.params;
+  const diseno = await getDisenoPublicadoPorId(id);
+  if (!diseno) return {};
+
+  const etiquetaPrecio = diseno.es_gratis ? "vector gratis" : "vector PRO";
+  const title = `${diseno.nombre} — ${diseno.deporte} ${etiquetaPrecio} para sublimación`;
+  const description = `Descargá el diseño vectorial ${diseno.nombre} de ${diseno.deporte} en ${diseno.formato}, listo para sublimación. ${
+    diseno.es_gratis ? "Descarga gratis." : `Diseño PRO, Gs. ${diseno.precio.toLocaleString("es-PY")}.`
+  }`;
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, images: diseno.imagen_url ? [diseno.imagen_url] : undefined },
+  };
+}
 
 export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
   const { id } = await props.params;
