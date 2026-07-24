@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getStorageUsage } from "@/lib/r2";
-import type { Perfil } from "@/lib/types/database";
+import type { Diseno, Perfil } from "@/lib/types/database";
 
 export type ResumenDashboard = {
   disenosPublicados: number;
@@ -51,6 +51,26 @@ export async function getResumenDashboard(): Promise<ResumenDashboard> {
     almacenamientoBytes: almacenamiento.bytes,
     almacenamientoObjetos: almacenamiento.objetos,
   };
+}
+
+export type DisenoConVendedor = Diseno & { vendedorNombre: string };
+
+export async function getTodosLosDisenos(): Promise<DisenoConVendedor[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("disenos").select("*").order("created_at", { ascending: false });
+
+  if (error || !data) {
+    if (error) console.error("Error al leer diseños:", error.message);
+    return [];
+  }
+
+  const vendedorIds = [...new Set(data.map((d) => d.vendedor_id))];
+  const { data: perfiles } = vendedorIds.length
+    ? await supabase.from("perfiles").select("id, nombre").in("id", vendedorIds)
+    : { data: [] };
+  const nombrePorId = new Map((perfiles ?? []).map((p) => [p.id, p.nombre]));
+
+  return data.map((d) => ({ ...d, vendedorNombre: nombrePorId.get(d.vendedor_id) ?? "—" }));
 }
 
 export async function getPerfilesConSuscripcion(): Promise<Perfil[]> {

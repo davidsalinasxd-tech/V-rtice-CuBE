@@ -5,6 +5,7 @@ import { RevisionCard } from "@/components/admin/RevisionCard";
 import { SuscripcionesPanel } from "@/components/admin/SuscripcionesPanel";
 import { DescargasMensualesPanel } from "@/components/admin/DescargasMensualesPanel";
 import { DashboardPanel } from "@/components/admin/DashboardPanel";
+import { DisenosPanel } from "@/components/admin/DisenosPanel";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
@@ -13,11 +14,13 @@ import {
   getPerfilesConSuscripcion,
   getDescargasPorVendedorDelMes,
   getResumenDashboard,
+  getTodosLosDisenos,
 } from "@/lib/supabase/admin-queries";
 
 const TABS = [
   { id: "resumen", label: "Resumen" },
   { id: "revision", label: "Revisión" },
+  { id: "disenos", label: "Diseños" },
   { id: "oficial", label: "Subir oficial" },
   { id: "suscriptores", label: "Suscriptores" },
   { id: "descargas", label: "Descargas" },
@@ -117,6 +120,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const perfiles = tab === "suscriptores" ? await getPerfilesConSuscripcion() : [];
   const descargasPorVendedor = tab === "descargas" ? await getDescargasPorVendedorDelMes(mesInicio, mesFin) : [];
   const resumen = tab === "resumen" ? await getResumenDashboard() : null;
+  const todosLosDisenos = tab === "disenos" ? await getTodosLosDisenos() : [];
 
   return (
     <>
@@ -153,6 +157,17 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         )}
 
         {tab === "revision" && pendientesUI}
+
+        {tab === "disenos" && (
+          <>
+            <h1 className="font-display mb-1.5 text-[26px] text-ink">Diseños</h1>
+            <p className="mb-8 text-[13px] text-text-dim">
+              Todo el catálogo, publicado o no. Borrar un diseño elimina también sus archivos de R2 — no se puede
+              deshacer.
+            </p>
+            <DisenosPanel disenos={todosLosDisenos} />
+          </>
+        )}
 
         {tab === "oficial" && (
           <>

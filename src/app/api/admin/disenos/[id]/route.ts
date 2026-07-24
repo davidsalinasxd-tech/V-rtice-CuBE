@@ -66,3 +66,31 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
   if (error) return NextResponse.json({ error: mensajeDeError(error.message) }, { status: 500 });
   return NextResponse.json({ diseno: data });
 }
+
+export async function DELETE(request: Request, ctx: RouteContext<"/api/admin/disenos/[id]">) {
+  const { id } = await ctx.params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!isAdminEmail(user?.email)) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 403 });
+  }
+
+  const { data: diseno, error: findError } = await supabase.from("disenos").select("*").eq("id", id).single();
+
+  if (findError || !diseno) {
+    return NextResponse.json({ error: "Diseño no encontrado." }, { status: 404 });
+  }
+
+  await Promise.all([
+    diseno.rar_url ? deleteObject(diseno.rar_url).catch(() => {}) : Promise.resolve(),
+    diseno.imagen_url ? deleteObject(diseno.imagen_url).catch(() => {}) : Promise.resolve(),
+  ]);
+
+  const { error } = await supabase.from("disenos").delete().eq("id", id);
+
+  if (error) return NextResponse.json({ error: mensajeDeError(error.message) }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
