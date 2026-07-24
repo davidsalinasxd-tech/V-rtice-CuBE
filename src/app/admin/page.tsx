@@ -4,13 +4,21 @@ import { Logo } from "@/components/Logo";
 import { RevisionCard } from "@/components/admin/RevisionCard";
 import { SuscripcionesPanel } from "@/components/admin/SuscripcionesPanel";
 import { DescargasMensualesPanel } from "@/components/admin/DescargasMensualesPanel";
+import { DashboardPanel } from "@/components/admin/DashboardPanel";
+import { UploadForm } from "@/components/vendedor/UploadForm";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { getDownloadUrl } from "@/lib/r2";
-import { getPerfilesConSuscripcion, getDescargasPorVendedorDelMes } from "@/lib/supabase/admin-queries";
+import {
+  getPerfilesConSuscripcion,
+  getDescargasPorVendedorDelMes,
+  getResumenDashboard,
+} from "@/lib/supabase/admin-queries";
 
 const TABS = [
+  { id: "resumen", label: "Resumen" },
   { id: "revision", label: "Revisión" },
+  { id: "oficial", label: "Subir oficial" },
   { id: "suscriptores", label: "Suscriptores" },
   { id: "descargas", label: "Descargas" },
 ] as const;
@@ -31,8 +39,8 @@ function formatMes(fecha: Date) {
 
 export default async function AdminPage(props: PageProps<"/admin">) {
   const searchParams = await props.searchParams;
-  const tabParam = typeof searchParams.tab === "string" ? searchParams.tab : "revision";
-  const tab: TabId = TABS.some((t) => t.id === tabParam) ? (tabParam as TabId) : "revision";
+  const tabParam = typeof searchParams.tab === "string" ? searchParams.tab : "resumen";
+  const tab: TabId = TABS.some((t) => t.id === tabParam) ? (tabParam as TabId) : "resumen";
 
   const mesInicio = parseMes(typeof searchParams.mes === "string" ? searchParams.mes : undefined);
   const mesFin = new Date(mesInicio.getFullYear(), mesInicio.getMonth() + 1, 1);
@@ -108,6 +116,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 
   const perfiles = tab === "suscriptores" ? await getPerfilesConSuscripcion() : [];
   const descargasPorVendedor = tab === "descargas" ? await getDescargasPorVendedorDelMes(mesInicio, mesFin) : [];
+  const resumen = tab === "resumen" ? await getResumenDashboard() : null;
 
   return (
     <>
@@ -135,7 +144,25 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           ))}
         </div>
 
+        {tab === "resumen" && resumen && (
+          <>
+            <h1 className="font-display mb-1.5 text-[26px] text-ink">Resumen</h1>
+            <p className="mb-8 text-[13px] text-text-dim">Lo más importante del negocio, de un vistazo.</p>
+            <DashboardPanel resumen={resumen} />
+          </>
+        )}
+
         {tab === "revision" && pendientesUI}
+
+        {tab === "oficial" && (
+          <>
+            <h1 className="font-display mb-1.5 text-[26px] text-ink">Subir diseño oficial</h1>
+            <p className="mb-8 text-[13px] text-text-dim">
+              Se publica directo (sin revisión) y no cuenta para los límites de espacio de vendedor externo.
+            </p>
+            <UploadForm esOficial />
+          </>
+        )}
 
         {tab === "suscriptores" && (
           <>

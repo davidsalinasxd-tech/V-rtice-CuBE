@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ensurePerfil } from "@/lib/supabase/perfil";
+import { isAdminEmail } from "@/lib/admin";
 import { R2_LIMITS } from "@/lib/r2";
 
 const inicioDeMes = () => {
@@ -27,13 +28,14 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { nombre, deporte, formato, esGratis, precio, autoriaConfirmada } = body as {
+  const { nombre, deporte, formato, esGratis, precio, autoriaConfirmada, esOficial } = body as {
     nombre?: string;
     deporte?: string;
     formato?: string;
     esGratis?: boolean;
     precio?: number;
     autoriaConfirmada?: boolean;
+    esOficial?: boolean;
   };
 
   if (!nombre || !deporte) {
@@ -47,30 +49,43 @@ export async function POST(request: Request) {
     );
   }
 
-  const { count: enRevision } = await supabase
-    .from("disenos")
-    .select("id", { count: "exact", head: true })
-    .eq("vendedor_id", user.id)
-    .eq("estado", "revision");
+  // Los diseños oficiales (subidos por el dueño de la plataforma) no pasan por
+  // revisión ni por los límites de espacio de vendedores externos.
+  const oficial = esOficial === true && isAdminEmail(user.email);
 
-  if ((enRevision ?? 0) >= R2_LIMITS.MAX_DISENOS_EN_REVISION) {
-    return NextResponse.json(
-      { error: `Ya tenés ${R2_LIMITS.MAX_DISENOS_EN_REVISION} diseños en revisión. Esperá la aprobación antes de subir más.` },
-      { status: 409 }
-    );
-  }
+  if (!oficial) {
+    const { count: enRevision } = await supabase
+      .from("disenos")
+      .select("id", { count: "exact", head: true })
+      .eq("vendedor_id", user.id)
+      .eq("estado", "revision");
 
-  const { count: esteMes } = await supabase
-    .from("disenos")
-    .select("id", { count: "exact", head: true })
-    .eq("vendedor_id", user.id)
-    .gte("created_at", inicioDeMes());
+    if ((enRevision ?? 0) >= R2_LIMITS.MAX_DISENOS_EN_REVISION) {
+      return NextResponse.json(
+        { error: `Ya tenés ${R2_LIMITS.MAX_DISENOS_EN_REVISION} diseños en revisión. Esperá la aprobación antes de subir más.` },
+        { status: 409 }
+      );
+    }
 
-  if ((esteMes ?? 0) >= R2_LIMITS.MAX_DISENOS_POR_MES) {
-    return NextResponse.json(
-      { error: `Alcanzaste el límite de ${R2_LIMITS.MAX_DISENOS_POR_MES} diseños nuevos este mes.` },
-      { status: 409 }
-    );
+    const { data: perfilVendedor } = await supabase
+      .from("perfiles")
+      .select("limite_disenos_mes")
+      .eq("id", user.id)
+      .maybeSingle();
+    const limiteMes = perfilVendedor?.limite_disenos_mes ?? R2_LIMITS.MAX_DISENOS_POR_MES;
+
+    const { count: esteMes } = await supabase
+      .from("disenos")
+      .select("id", { count: "exact", head: true })
+      .eq("vendedor_id", user.id)
+      .gte("created_at", inicioDeMes());
+
+    if ((esteMes ?? 0) >= limiteMes) {
+      return NextResponse.json(
+        { error: `Alcanzaste el límite de ${limiteMes} diseños nuevos este mes.` },
+        { status: 409 }
+      );
+    }
   }
 
   const { data, error } = await supabase
@@ -83,7 +98,9 @@ export async function POST(request: Request) {
       es_gratis: esGratis ?? true,
       precio: esGratis ? 0 : (precio ?? 0),
       autoria_confirmada: true,
-      estado: "revision",
+      estado: oficial ? "publicado" : "revision",
+      es_oficial: oficial,
+      es_pro: oficial,
     })
     .select()
     .single();

@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 export const R2_LIMITS = {
@@ -7,6 +7,7 @@ export const R2_LIMITS = {
   MAX_DISENOS_EN_REVISION: 3,
   MAX_DISENOS_POR_MES: 10,
   DISENOS_APROBADOS_PARA_COBRO: 10,
+  STORAGE_LIMIT_BYTES: 10 * 1024 * 1024 * 1024,
 } as const
 
 export const SUSCRIPCION = {
@@ -60,6 +61,28 @@ export async function getDownloadUrl(key: string, expiresInSeconds = 300) {
 export async function deleteObject(key: string) {
   const command = new DeleteObjectCommand({ Bucket: BUCKET(), Key: key })
   await getR2Client().send(command)
+}
+
+/** Suma el tamaño real de todo lo guardado en el bucket, paginando si hace falta. */
+export async function getStorageUsage(): Promise<{ bytes: number; objetos: number }> {
+  let bytes = 0
+  let objetos = 0
+  let continuationToken: string | undefined
+
+  do {
+    const command = new ListObjectsV2Command({
+      Bucket: BUCKET(),
+      ContinuationToken: continuationToken,
+    })
+    const res = await getR2Client().send(command)
+    for (const obj of res.Contents ?? []) {
+      bytes += obj.Size ?? 0
+      objetos += 1
+    }
+    continuationToken = res.IsTruncated ? res.NextContinuationToken : undefined
+  } while (continuationToken)
+
+  return { bytes, objetos }
 }
 
 /** URL pública (bucket con Public Access habilitado) para servir portadas del catálogo sin firmar. */

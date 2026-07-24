@@ -9,6 +9,7 @@ export type Perfil = {
   es_suscriptor: boolean
   suscripcion_vence: string | null
   es_admin: boolean
+  limite_disenos_mes: number | null
   created_at: string
 }
 

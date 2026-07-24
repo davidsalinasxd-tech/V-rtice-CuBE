@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const MAX_RAR_BYTES = 50 * 1024 * 1024;
 const MAX_IMG_BYTES = 3 * 1024 * 1024;
 
-export function UploadForm() {
+export function UploadForm({ esOficial = false }: { esOficial?: boolean } = {}) {
   const router = useRouter();
   const [esGratis, setEsGratis] = useState(true);
   const [precio, setPrecio] = useState("");
@@ -65,6 +65,7 @@ export function UploadForm() {
           esGratis,
           precio: esGratis ? 0 : parseInt(precio || "0", 10),
           autoriaConfirmada: autoria,
+          esOficial,
         }),
       });
       const createJson = await createRes.json();
@@ -83,7 +84,7 @@ export function UploadForm() {
       });
       if (!patchRes.ok) throw new Error("El diseño se creó pero no se pudieron guardar los archivos.");
 
-      setSuccess("¡Listo! Diseño enviado a revisión.");
+      setSuccess(esOficial ? "¡Listo! Diseño oficial publicado." : "¡Listo! Diseño enviado a revisión.");
       setPrecio("");
       setAutoria(false);
       setRarFile(null);
@@ -169,7 +170,11 @@ export function UploadForm() {
         />
       </div>
 
-      {!esGratis ? (
+      {esOficial ? (
+        <div className="rounded-[3px] bg-paper px-4 py-3.5 text-[13px] text-text-dim">
+          Diseño oficial: se publica directo, sin pasar por revisión ni por los límites de vendedor externo.
+        </div>
+      ) : !esGratis ? (
         <div className="flex items-center justify-between rounded-[3px] bg-paper px-4 py-3.5 text-[13px] text-text-dim">
           <span>
             Con un precio de <b className="text-ink">Gs. {(parseInt(precio || "0", 10)).toLocaleString("es-PY")}</b>,
@@ -201,7 +206,7 @@ export function UploadForm() {
         disabled={!autoria || submitting}
         className="w-fit cursor-pointer rounded-sm bg-orange px-5.5 py-3.25 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {submitting ? "Publicando…" : "Publicar diseño"}
+        {submitting ? "Publicando…" : esOficial ? "Publicar diseño oficial" : "Publicar diseño"}
       </button>
     </form>
   );

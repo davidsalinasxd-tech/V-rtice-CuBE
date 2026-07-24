@@ -18,12 +18,17 @@ export function SuscripcionesPanel({ perfiles }: { perfiles: Perfil[] }) {
   const [query, setQuery] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [limites, setLimites] = useState<Record<string, string>>({});
 
   const filtrados = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return perfiles;
     return perfiles.filter((p) => `${p.nombre} ${p.email ?? ""}`.toLowerCase().includes(q));
   }, [perfiles, query]);
+
+  function limiteValue(p: Perfil) {
+    return limites[p.id] ?? (p.limite_disenos_mes != null ? String(p.limite_disenos_mes) : "");
+  }
 
   async function accionar(perfilId: string, accion: "activar" | "cancelar") {
     setLoadingId(perfilId);
@@ -36,6 +41,28 @@ export function SuscripcionesPanel({ perfiles }: { perfiles: Perfil[] }) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo actualizar la suscripción.");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error inesperado.");
+    } finally {
+      setLoadingId(null);
+    }
+  }
+
+  async function guardarLimite(perfilId: string) {
+    setLoadingId(perfilId);
+    setError(null);
+    try {
+      const perfilActual = perfiles.find((p) => p.id === perfilId);
+      const valor = (limites[perfilId] ?? (perfilActual?.limite_disenos_mes != null ? String(perfilActual.limite_disenos_mes) : "")).trim();
+      const limiteDisenosMes = valor === "" ? null : parseInt(valor, 10);
+      const res = await fetch(`/api/admin/vendedores/${perfilId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ limiteDisenosMes }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "No se pudo actualizar el límite.");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error inesperado.");
@@ -66,6 +93,7 @@ export function SuscripcionesPanel({ perfiles }: { perfiles: Perfil[] }) {
               <Th>Rol</Th>
               <Th>Estado</Th>
               <Th>Vence</Th>
+              <Th>Límite/mes</Th>
               <Th align="right">Acciones</Th>
             </tr>
           </thead>
@@ -89,6 +117,25 @@ export function SuscripcionesPanel({ perfiles }: { perfiles: Perfil[] }) {
                     </span>
                   </td>
                   <td className="py-3.5 pr-3 font-mono text-xs text-text-dim">{formatFecha(p.suscripcion_vence)}</td>
+                  <td className="py-3.5 pr-3">
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="10"
+                        value={limiteValue(p)}
+                        onChange={(e) => setLimites((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                        className="w-16 rounded-sm border border-line-strong bg-white px-2 py-1 text-xs focus:border-orange focus:outline-none"
+                      />
+                      <button
+                        onClick={() => guardarLimite(p.id)}
+                        disabled={loadingId === p.id}
+                        className="cursor-pointer rounded-sm border border-line-strong px-2 py-1 text-[11px] font-semibold text-navy transition-colors hover:border-navy disabled:cursor-wait disabled:opacity-50"
+                      >
+                        Guardar
+                      </button>
+                    </div>
+                  </td>
                   <td className="py-3.5 text-right">
                     <div className="flex justify-end gap-2">
                       <button

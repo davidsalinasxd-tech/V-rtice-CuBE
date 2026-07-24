@@ -1,5 +1,57 @@
 import { createClient } from "@/lib/supabase/server";
+import { getStorageUsage } from "@/lib/r2";
 import type { Perfil } from "@/lib/types/database";
+
+export type ResumenDashboard = {
+  disenosPublicados: number;
+  disenosEnRevision: number;
+  vendedoresConDisenos: number;
+  suscriptoresActivos: number;
+  descargasEsteMes: number;
+  almacenamientoBytes: number;
+  almacenamientoObjetos: number;
+};
+
+export async function getResumenDashboard(): Promise<ResumenDashboard> {
+  const supabase = await createClient();
+  const ahora = new Date();
+  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1).toISOString();
+
+  const [
+    { count: disenosPublicados },
+    { count: disenosEnRevision },
+    { data: vendedoresData },
+    { count: suscriptoresActivos },
+    { count: descargasEsteMes },
+    almacenamiento,
+  ] = await Promise.all([
+    supabase.from("disenos").select("id", { count: "exact", head: true }).eq("estado", "publicado"),
+    supabase.from("disenos").select("id", { count: "exact", head: true }).eq("estado", "revision"),
+    supabase.from("disenos").select("vendedor_id").eq("es_oficial", false),
+    supabase
+      .from("perfiles")
+      .select("id", { count: "exact", head: true })
+      .eq("es_suscriptor", true)
+      .gt("suscripcion_vence", ahora.toISOString()),
+    supabase.from("descargas").select("id", { count: "exact", head: true }).gte("created_at", inicioMes),
+    getStorageUsage().catch((e) => {
+      console.error("Error al leer el uso de almacenamiento de R2:", e);
+      return { bytes: 0, objetos: 0 };
+    }),
+  ]);
+
+  const vendedoresConDisenos = new Set((vendedoresData ?? []).map((d) => d.vendedor_id)).size;
+
+  return {
+    disenosPublicados: disenosPublicados ?? 0,
+    disenosEnRevision: disenosEnRevision ?? 0,
+    vendedoresConDisenos,
+    suscriptoresActivos: suscriptoresActivos ?? 0,
+    descargasEsteMes: descargasEsteMes ?? 0,
+    almacenamientoBytes: almacenamiento.bytes,
+    almacenamientoObjetos: almacenamiento.objetos,
+  };
+}
 
 export async function getPerfilesConSuscripcion(): Promise<Perfil[]> {
   const supabase = await createClient();
