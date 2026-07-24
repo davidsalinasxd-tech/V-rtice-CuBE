@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { linkTelegramCompra } from "@/lib/telegram";
 
 export function DownloadButton({
@@ -9,6 +10,7 @@ export function DownloadButton({
   esOficial,
   suscripcionActiva,
   cupoExternoDisponible,
+  estaAutenticado,
   codigo,
   nombre,
   precio,
@@ -18,6 +20,7 @@ export function DownloadButton({
   esOficial: boolean;
   suscripcionActiva: boolean;
   cupoExternoDisponible: boolean;
+  estaAutenticado: boolean;
   codigo: string;
   nombre: string;
   precio: number;
@@ -25,9 +28,26 @@ export function DownloadButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [forzarTelegram, setForzarTelegram] = useState(false);
+  const [requiereLogin, setRequiereLogin] = useState(false);
 
   const cubiertoPorSuscripcion = suscripcionActiva && (esOficial || cupoExternoDisponible);
   const descargaDirecta = esGratis || cubiertoPorSuscripcion;
+
+  if ((descargaDirecta && !estaAutenticado) || requiereLogin) {
+    return (
+      <div>
+        <Link
+          href="/registro"
+          className="flex w-full items-center justify-center gap-2 rounded-[3px] bg-orange px-6.5 py-4 text-[15px] font-bold text-white transition-colors hover:bg-orange-2"
+        >
+          Iniciá sesión para descargar →
+        </Link>
+        <p className="mt-3.5 text-xs leading-relaxed text-text-dim">
+          Necesitás una cuenta gratis en Vértice Cube para descargar diseños, incluidos los gratuitos.
+        </p>
+      </div>
+    );
+  }
 
   if (!descargaDirecta || forzarTelegram) {
     return (
@@ -60,6 +80,10 @@ export function DownloadButton({
       });
       const json = await res.json();
       if (!res.ok) {
+        if (res.status === 401) {
+          setRequiereLogin(true);
+          return;
+        }
         if (res.status === 403) {
           setError(json.error ?? "No se pudo generar el link de descarga.");
           setForzarTelegram(true);

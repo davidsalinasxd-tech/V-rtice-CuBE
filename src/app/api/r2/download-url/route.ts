@@ -27,16 +27,16 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return NextResponse.json(
+      { error: "Necesitás una cuenta para descargar. Iniciá sesión o registrate gratis.", motivo: "sin_cuenta" },
+      { status: 401 },
+    );
+  }
+
   let viaSuscripcion = false;
 
   if (!diseno.es_gratis) {
-    if (!user) {
-      return NextResponse.json(
-        { error: "Este diseño es pago. Coordiná el pago por Telegram.", motivo: "sin_suscripcion" },
-        { status: 403 },
-      );
-    }
-
     const estado = await getEstadoSuscripcion(supabase, user.id);
     if (!estado.activa) {
       return NextResponse.json(
@@ -65,10 +65,10 @@ export async function POST(request: Request) {
 
   await supabase.from("descargas").insert({
     diseno_id: diseno.id,
-    usuario_id: user?.id ?? null,
+    usuario_id: user.id,
     precio_pagado: 0,
     via_suscripcion: viaSuscripcion,
-    cuenta_para_pago: !user || user.id !== diseno.vendedor_id,
+    cuenta_para_pago: user.id !== diseno.vendedor_id,
   });
 
   return NextResponse.json({ url });

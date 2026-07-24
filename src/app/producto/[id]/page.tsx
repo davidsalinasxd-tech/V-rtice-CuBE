@@ -105,6 +105,7 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
               esOficial={diseno.es_oficial}
               suscripcionActiva={estadoSuscripcion.activa}
               cupoExternoDisponible={cupoExterno?.disponible ?? false}
+              estaAutenticado={!!user}
               codigo={codigo}
               nombre={diseno.nombre}
               precio={diseno.precio}
