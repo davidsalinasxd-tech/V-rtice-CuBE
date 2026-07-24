@@ -4,10 +4,12 @@ import { Logo } from "@/components/Logo";
 import { HexIcon } from "@/components/HexIcon";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
+import { SolicitudVendedor } from "@/components/vendedor/SolicitudVendedor";
 import { createClient } from "@/lib/supabase/server";
 import { ensurePerfil } from "@/lib/supabase/perfil";
 import { getConteoDescargasPorDisenos } from "@/lib/supabase/queries";
 import { cerrarSesion } from "@/app/actions/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { R2_LIMITS } from "@/lib/r2";
 
 const ESTADO_LABEL = {
@@ -43,6 +45,32 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
     supabase.from("disenos").select("*").eq("vendedor_id", user.id).order("created_at", { ascending: false }),
     supabase.from("metodos_cobro").select("*").eq("vendedor_id", user.id).maybeSingle(),
   ]);
+
+  const estadoVendedor = perfil?.estado_vendedor ?? "ninguno";
+  const esVendedorAprobado = estadoVendedor === "aprobado" || isAdminEmail(user.email);
+
+  if (!esVendedorAprobado) {
+    return (
+      <>
+        <nav className="border-b border-line">
+          <div className="mx-auto flex h-19 max-w-6xl items-center justify-between px-8">
+            <Logo />
+            <form action={cerrarSesion}>
+              <button
+                type="submit"
+                className="cursor-pointer text-sm font-medium text-text-dim transition-colors hover:text-navy"
+              >
+                Salir
+              </button>
+            </form>
+          </div>
+        </nav>
+        <div className="mx-auto max-w-lg px-8 py-24 text-center">
+          <SolicitudVendedor estado={estadoVendedor} />
+        </div>
+      </>
+    );
+  }
 
   const misDisenos = disenos ?? [];
   const conteoDescargas =

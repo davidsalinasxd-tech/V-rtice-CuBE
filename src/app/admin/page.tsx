@@ -6,6 +6,7 @@ import { SuscripcionesPanel } from "@/components/admin/SuscripcionesPanel";
 import { DescargasMensualesPanel } from "@/components/admin/DescargasMensualesPanel";
 import { DashboardPanel } from "@/components/admin/DashboardPanel";
 import { DisenosPanel } from "@/components/admin/DisenosPanel";
+import { SolicitudesPanel } from "@/components/admin/SolicitudesPanel";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
@@ -15,11 +16,13 @@ import {
   getDescargasPorVendedorDelMes,
   getResumenDashboard,
   getTodosLosDisenos,
+  getSolicitudesVendedorPendientes,
 } from "@/lib/supabase/admin-queries";
 
 const TABS = [
   { id: "resumen", label: "Resumen" },
   { id: "revision", label: "Revisión" },
+  { id: "solicitudes", label: "Solicitudes" },
   { id: "disenos", label: "Diseños" },
   { id: "oficial", label: "Subir oficial" },
   { id: "suscriptores", label: "Suscriptores" },
@@ -121,6 +124,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const descargasPorVendedor = tab === "descargas" ? await getDescargasPorVendedorDelMes(mesInicio, mesFin) : [];
   const resumen = tab === "resumen" ? await getResumenDashboard() : null;
   const todosLosDisenos = tab === "disenos" ? await getTodosLosDisenos() : [];
+  const solicitudes = tab === "solicitudes" ? await getSolicitudesVendedorPendientes() : [];
 
   return (
     <>
@@ -157,6 +161,18 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         )}
 
         {tab === "revision" && pendientesUI}
+
+        {tab === "solicitudes" && (
+          <>
+            <h1 className="font-display mb-1.5 text-[26px] text-ink">Solicitudes de vendedor</h1>
+            <p className="mb-8 text-[13px] text-text-dim">
+              {solicitudes.length === 0
+                ? "No hay solicitudes pendientes."
+                : `${solicitudes.length} solicitud${solicitudes.length === 1 ? "" : "es"} esperando aprobación.`}
+            </p>
+            <SolicitudesPanel solicitudes={solicitudes} />
+          </>
+        )}
 
         {tab === "disenos" && (
           <>

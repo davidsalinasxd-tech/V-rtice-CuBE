@@ -1,5 +1,6 @@
 export type Rol = 'comprador' | 'vendedor' | 'ambos'
 export type EstadoDiseno = 'revision' | 'publicado' | 'rechazado'
+export type EstadoVendedor = 'ninguno' | 'pendiente' | 'aprobado' | 'rechazado'
 
 export type Perfil = {
   id: string
@@ -10,6 +11,7 @@ export type Perfil = {
   suscripcion_vence: string | null
   es_admin: boolean
   limite_disenos_mes: number | null
+  estado_vendedor: EstadoVendedor
   created_at: string
 }
 

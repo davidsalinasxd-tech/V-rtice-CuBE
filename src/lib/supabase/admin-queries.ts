@@ -73,6 +73,22 @@ export async function getTodosLosDisenos(): Promise<DisenoConVendedor[]> {
   return data.map((d) => ({ ...d, vendedorNombre: nombrePorId.get(d.vendedor_id) ?? "—" }));
 }
 
+export async function getSolicitudesVendedorPendientes(): Promise<Perfil[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("perfiles")
+    .select("*")
+    .eq("estado_vendedor", "pendiente")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error al leer solicitudes de vendedor:", error.message);
+    return [];
+  }
+
+  return data ?? [];
+}
+
 export async function getPerfilesConSuscripcion(): Promise<Perfil[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("perfiles").select("*").order("created_at", { ascending: false });

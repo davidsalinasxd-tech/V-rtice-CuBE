@@ -54,6 +54,19 @@ export async function POST(request: Request) {
   const oficial = esOficial === true && isAdminEmail(user.email);
 
   if (!oficial) {
+    const { data: perfilVendedor } = await supabase
+      .from("perfiles")
+      .select("limite_disenos_mes, estado_vendedor")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (perfilVendedor?.estado_vendedor !== "aprobado") {
+      return NextResponse.json(
+        { error: "Todavía no sos vendedor aprobado. Solicitalo desde tu panel." },
+        { status: 403 }
+      );
+    }
+
     const { count: enRevision } = await supabase
       .from("disenos")
       .select("id", { count: "exact", head: true })
@@ -67,11 +80,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: perfilVendedor } = await supabase
-      .from("perfiles")
-      .select("limite_disenos_mes")
-      .eq("id", user.id)
-      .maybeSingle();
     const limiteMes = perfilVendedor?.limite_disenos_mes ?? R2_LIMITS.MAX_DISENOS_POR_MES;
 
     const { count: esteMes } = await supabase
