@@ -5,6 +5,7 @@ import { HexIcon } from "@/components/HexIcon";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
 import { SolicitudVendedor } from "@/components/vendedor/SolicitudVendedor";
+import { SolicitarCambioPrecio } from "@/components/vendedor/SolicitarCambioPrecio";
 import { createClient } from "@/lib/supabase/server";
 import { ensurePerfil } from "@/lib/supabase/perfil";
 import { getConteoDescargasPorDisenos } from "@/lib/supabase/queries";
@@ -75,6 +76,15 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
   const misDisenos = disenos ?? [];
   const conteoDescargas =
     tab === "disenos" ? await getConteoDescargasPorDisenos(misDisenos.map((d) => d.id)) : new Map<string, number>();
+  const disenosConSolicitudPendiente = new Set<string>();
+  if (tab === "disenos" && misDisenos.length > 0) {
+    const { data: solicitudesPendientes } = await supabase
+      .from("solicitudes_precio")
+      .select("diseno_id")
+      .eq("vendedor_id", user.id)
+      .eq("estado", "pendiente");
+    for (const s of solicitudesPendientes ?? []) disenosConSolicitudPendiente.add(s.diseno_id);
+  }
   const aprobados = misDisenos.filter((d) => d.estado === "publicado").length;
   const enRevision = misDisenos.filter((d) => d.estado === "revision").length;
   const faltan = Math.max(0, R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO - aprobados);
@@ -235,8 +245,18 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
                         <td className="py-3.5 text-right font-mono text-sm text-navy-2">
                           {conteoDescargas.get(d.id) ?? 0}
                         </td>
-                        <td className="py-3.5 text-right font-mono text-sm">
-                          {d.es_gratis ? "Gratis" : `Gs. ${d.precio.toLocaleString("es-PY")}`}
+                        <td className="py-3.5 text-right">
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="font-mono text-sm">
+                              {d.es_gratis ? "Gratis" : `Gs. ${d.precio.toLocaleString("es-PY")}`}
+                            </span>
+                            <SolicitarCambioPrecio
+                              disenoId={d.id}
+                              esGratis={d.es_gratis}
+                              precio={d.precio}
+                              pendiente={disenosConSolicitudPendiente.has(d.id)}
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))}

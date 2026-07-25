@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DisenoConVendedor } from "@/lib/supabase/admin-queries";
+import { EditarPrecioDiseno } from "./EditarPrecioDiseno";
 
 const ESTADO_LABEL = {
   publicado: "Publicado",
@@ -89,8 +90,8 @@ export function DisenosPanel({ disenos }: { disenos: DisenoConVendedor[] }) {
                     {ESTADO_LABEL[d.estado]}
                   </span>
                 </td>
-                <td className="py-3.5 text-right font-mono text-sm">
-                  {d.es_gratis ? "Gratis" : `Gs. ${d.precio.toLocaleString("es-PY")}`}
+                <td className="py-3.5 text-right">
+                  <EditarPrecioDiseno disenoId={d.id} esGratis={d.es_gratis} precio={d.precio} />
                 </td>
                 <td className="py-3.5 text-right">
                   <button

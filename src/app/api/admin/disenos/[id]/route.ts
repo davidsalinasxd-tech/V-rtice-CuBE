@@ -22,10 +22,29 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
   }
 
   const body = await request.json();
-  const { accion } = body as { accion?: "aprobar" | "rechazar" };
+  const { accion, esGratis, precio } = body as {
+    accion?: "aprobar" | "rechazar" | "editar";
+    esGratis?: boolean;
+    precio?: number;
+  };
 
-  if (accion !== "aprobar" && accion !== "rechazar") {
+  if (accion !== "aprobar" && accion !== "rechazar" && accion !== "editar") {
     return NextResponse.json({ error: "Acción inválida." }, { status: 400 });
+  }
+
+  if (accion === "editar") {
+    if (typeof esGratis !== "boolean") {
+      return NextResponse.json({ error: "Falta indicar si es gratis." }, { status: 400 });
+    }
+    const { data, error } = await supabase
+      .from("disenos")
+      .update({ es_gratis: esGratis, precio: esGratis ? 0 : (precio ?? 0) })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: mensajeDeError(error.message) }, { status: 500 });
+    return NextResponse.json({ diseno: data });
   }
 
   const { data: diseno, error: findError } = await supabase

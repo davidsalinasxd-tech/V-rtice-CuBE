@@ -7,6 +7,7 @@ import { DescargasMensualesPanel } from "@/components/admin/DescargasMensualesPa
 import { DashboardPanel } from "@/components/admin/DashboardPanel";
 import { DisenosPanel } from "@/components/admin/DisenosPanel";
 import { SolicitudesPanel } from "@/components/admin/SolicitudesPanel";
+import { SolicitudesPrecioPanel } from "@/components/admin/SolicitudesPrecioPanel";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
@@ -17,6 +18,7 @@ import {
   getResumenDashboard,
   getTodosLosDisenos,
   getSolicitudesVendedorPendientes,
+  getSolicitudesPrecioPendientes,
 } from "@/lib/supabase/admin-queries";
 
 const TABS = [
@@ -125,6 +127,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const resumen = tab === "resumen" ? await getResumenDashboard() : null;
   const todosLosDisenos = tab === "disenos" ? await getTodosLosDisenos() : [];
   const solicitudes = tab === "solicitudes" ? await getSolicitudesVendedorPendientes() : [];
+  const solicitudesPrecio = tab === "solicitudes" ? await getSolicitudesPrecioPendientes() : [];
 
   return (
     <>
@@ -171,6 +174,12 @@ export default async function AdminPage(props: PageProps<"/admin">) {
                 : `${solicitudes.length} solicitud${solicitudes.length === 1 ? "" : "es"} esperando aprobación.`}
             </p>
             <SolicitudesPanel solicitudes={solicitudes} />
+
+            <h2 className="font-display mt-12 mb-1.5 text-[22px] text-ink">Cambios de precio</h2>
+            <p className="mb-8 text-[13px] text-text-dim">
+              Pedidos de vendedores para cambiar el precio o pasar a gratis un diseño ya publicado.
+            </p>
+            <SolicitudesPrecioPanel solicitudes={solicitudesPrecio} />
           </>
         )}
 

@@ -52,6 +52,18 @@ export type MetodoCobro = {
   created_at: string
 }
 
+export type EstadoSolicitudPrecio = 'pendiente' | 'aprobada' | 'rechazada'
+
+export type SolicitudPrecio = {
+  id: string
+  diseno_id: string
+  vendedor_id: string
+  es_gratis: boolean
+  precio: number
+  estado: EstadoSolicitudPrecio
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -77,6 +89,12 @@ export type Database = {
         Row: MetodoCobro
         Insert: Partial<MetodoCobro> & Pick<MetodoCobro, 'vendedor_id'>
         Update: Partial<MetodoCobro>
+        Relationships: []
+      }
+      solicitudes_precio: {
+        Row: SolicitudPrecio
+        Insert: Partial<SolicitudPrecio> & Pick<SolicitudPrecio, 'diseno_id' | 'vendedor_id' | 'es_gratis'>
+        Update: Partial<SolicitudPrecio>
         Relationships: []
       }
     }
