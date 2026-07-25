@@ -131,16 +131,25 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
       </section>
 
       <footer className="border-t border-line bg-white py-10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-8">
-          <span className="font-mono text-xs text-text-dim">VÉRTICE CUBE © 2026</span>
-          <div className="flex gap-6">
-            <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
-              Términos
-            </Link>
-            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-[13px] text-text-dim hover:text-navy">
-              Contacto / Soporte
-            </a>
+        <div className="mx-auto max-w-6xl px-8">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-xs text-text-dim">VÉRTICE CUBE © 2026</span>
+            <div className="flex gap-6">
+              <Link href="#" className="text-[13px] text-text-dim hover:text-navy">
+                Términos
+              </Link>
+              <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-[13px] text-text-dim hover:text-navy">
+                Contacto / Soporte
+              </a>
+            </div>
           </div>
+          <p className="mt-4 text-center text-[11px] text-text-dim">
+            ¿Necesitás un diseño específico? Solicitalo por{" "}
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-navy-2 hover:text-orange">
+              Telegram
+            </a>
+            .
+          </p>
         </div>
       </footer>
     </>
