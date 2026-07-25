@@ -132,7 +132,8 @@ export default async function Home() {
               </a>
             </div>
           </div>
-          <p className="mt-4 text-center text-[11px] text-text-dim">
+          <p className="mt-4 flex items-center justify-center gap-2 text-center text-[11px] text-text-dim">
+            <span className="pulse-dot h-1.5 w-1.5 shrink-0 rounded-full bg-orange" />
             ¿Necesitás un diseño específico? Solicitalo por{" "}
             <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-navy-2 hover:text-orange">
               Telegram
