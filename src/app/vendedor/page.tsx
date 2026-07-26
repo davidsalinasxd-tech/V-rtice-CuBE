@@ -6,6 +6,7 @@ import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
 import { SolicitudVendedor } from "@/components/vendedor/SolicitudVendedor";
 import { SolicitarCambioPrecio } from "@/components/vendedor/SolicitarCambioPrecio";
+import { SolicitarPago } from "@/components/vendedor/SolicitarPago";
 import { createClient } from "@/lib/supabase/server";
 import { ensurePerfil } from "@/lib/supabase/perfil";
 import { getConteoDescargasPorDisenos } from "@/lib/supabase/queries";
@@ -89,6 +90,16 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
   const enRevision = misDisenos.filter((d) => d.estado === "revision").length;
   const faltan = Math.max(0, R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO - aprobados);
   const cobroActivo = faltan === 0;
+  const metodoCompleto = !!(metodo?.banco && metodo?.numero_cuenta && metodo?.titular && metodo?.ci_ruc);
+  let solicitudPagoPendiente = false;
+  if (tab === "pagos") {
+    const { count } = await supabase
+      .from("solicitudes_pago")
+      .select("id", { count: "exact", head: true })
+      .eq("vendedor_id", user.id)
+      .eq("estado", "pendiente");
+    solicitudPagoPendiente = (count ?? 0) > 0;
+  }
   const progreso = Math.min(100, (aprobados / R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO) * 100);
   const nombre = perfil?.nombre ?? user.email ?? "vendedor";
   const iniciales = nombre
@@ -275,17 +286,14 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
                       {cobroActivo ? "Disponible al vender" : "Bloqueado"}
                     </div>
                     <p className="mt-1 text-xs text-text-dim">
-                      {cobroActivo
-                        ? "Ya podés recibir pagos por transferencia bancaria manual."
-                        : `El cobro se activa al llegar a ${R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO} diseños aprobados (te faltan ${faltan}).`}
+                      {!cobroActivo
+                        ? `El cobro se activa al llegar a ${R2_LIMITS.DISENOS_APROBADOS_PARA_COBRO} diseños aprobados (te faltan ${faltan}).`
+                        : !metodoCompleto
+                          ? "Completá tus datos de transferencia abajo para poder solicitar el pago."
+                          : "Ya podés recibir pagos por transferencia bancaria manual."}
                     </p>
                   </div>
-                  <button
-                    disabled={!cobroActivo}
-                    className="cursor-pointer rounded-sm border border-line-strong px-5 py-3 text-sm font-semibold transition-colors hover:border-text-dim hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Solicitar pago
-                  </button>
+                  <SolicitarPago metodoCompleto={cobroActivo && metodoCompleto} pendiente={solicitudPagoPendiente} />
                 </div>
               </Panel>
 

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getStorageUsage } from "@/lib/r2";
-import type { Diseno, Perfil, SolicitudPrecio } from "@/lib/types/database";
+import type { Diseno, MetodoCobro, Perfil, SolicitudPago, SolicitudPrecio } from "@/lib/types/database";
 
 export type ResumenDashboard = {
   disenosPublicados: number;
@@ -119,6 +119,38 @@ export async function getSolicitudesPrecioPendientes(): Promise<SolicitudPrecioC
     ...s,
     disenoNombre: nombreDisenoPorId.get(s.diseno_id) ?? "—",
     vendedorNombre: nombreVendedorPorId.get(s.vendedor_id) ?? "—",
+  }));
+}
+
+export type SolicitudPagoConDetalle = SolicitudPago & { vendedorNombre: string; metodo: MetodoCobro | null };
+
+export async function getSolicitudesPagoPendientes(): Promise<SolicitudPagoConDetalle[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("solicitudes_pago")
+    .select("*")
+    .eq("estado", "pendiente")
+    .order("created_at", { ascending: true });
+
+  if (error || !data) {
+    if (error) console.error("Error al leer solicitudes de pago:", error.message);
+    return [];
+  }
+
+  const vendedorIds = [...new Set(data.map((s) => s.vendedor_id))];
+
+  const [{ data: perfiles }, { data: metodos }] = await Promise.all([
+    vendedorIds.length ? supabase.from("perfiles").select("id, nombre").in("id", vendedorIds) : Promise.resolve({ data: [] }),
+    vendedorIds.length ? supabase.from("metodos_cobro").select("*").in("vendedor_id", vendedorIds) : Promise.resolve({ data: [] }),
+  ]);
+
+  const nombrePorId = new Map((perfiles ?? []).map((p) => [p.id, p.nombre]));
+  const metodoPorVendedor = new Map((metodos ?? []).map((m) => [m.vendedor_id, m]));
+
+  return data.map((s) => ({
+    ...s,
+    vendedorNombre: nombrePorId.get(s.vendedor_id) ?? "—",
+    metodo: metodoPorVendedor.get(s.vendedor_id) ?? null,
   }));
 }
 

@@ -64,6 +64,16 @@ export type SolicitudPrecio = {
   created_at: string
 }
 
+export type EstadoSolicitudPago = 'pendiente' | 'pagado'
+
+export type SolicitudPago = {
+  id: string
+  vendedor_id: string
+  estado: EstadoSolicitudPago
+  created_at: string
+  pagado_at: string | null
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -95,6 +105,12 @@ export type Database = {
         Row: SolicitudPrecio
         Insert: Partial<SolicitudPrecio> & Pick<SolicitudPrecio, 'diseno_id' | 'vendedor_id' | 'es_gratis'>
         Update: Partial<SolicitudPrecio>
+        Relationships: []
+      }
+      solicitudes_pago: {
+        Row: SolicitudPago
+        Insert: Partial<SolicitudPago> & Pick<SolicitudPago, 'vendedor_id'>
+        Update: Partial<SolicitudPago>
         Relationships: []
       }
     }
