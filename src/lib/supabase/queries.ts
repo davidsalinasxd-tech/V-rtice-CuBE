@@ -44,6 +44,51 @@ export async function getPerfilVendedorPublico(id: string): Promise<PerfilVended
   };
 }
 
+async function vendedorConMasDescargas(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  inicio: Date,
+  fin: Date
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("descargas")
+    .select("disenos!inner(vendedor_id, es_oficial)")
+    .eq("cuenta_para_pago", true)
+    .gte("created_at", inicio.toISOString())
+    .lt("created_at", fin.toISOString());
+
+  if (!data || data.length === 0) return null;
+
+  const conteos = new Map<string, number>();
+  for (const fila of data as unknown as Array<{
+    disenos: { vendedor_id: string; es_oficial: boolean } | { vendedor_id: string; es_oficial: boolean }[];
+  }>) {
+    const rel = Array.isArray(fila.disenos) ? fila.disenos[0] : fila.disenos;
+    if (!rel || rel.es_oficial) continue;
+    conteos.set(rel.vendedor_id, (conteos.get(rel.vendedor_id) ?? 0) + 1);
+  }
+
+  if (conteos.size === 0) return null;
+  return [...conteos.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
+/**
+ * Vendedor externo (no oficial) con más descargas reales del mes pasado.
+ * Si todavía no hay descargas del mes pasado (ej. recién arrancando), usa el
+ * líder del mes actual para que la insignia no quede vacía desde el día uno.
+ */
+export async function getVendedorDestacadoDelMes(): Promise<string | null> {
+  const supabase = await createClient();
+  const ahora = new Date();
+  const inicioMesActual = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+  const inicioMesPasado = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+  const inicioMesSiguiente = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 1);
+
+  const delMesPasado = await vendedorConMasDescargas(supabase, inicioMesPasado, inicioMesActual);
+  if (delMesPasado) return delMesPasado;
+
+  return vendedorConMasDescargas(supabase, inicioMesActual, inicioMesSiguiente);
+}
+
 /** Nombres públicos de vendedores aprobados, para linkear desde el catálogo/ficha de producto. */
 export async function getNombresVendedores(vendedorIds: string[]): Promise<Map<string, string>> {
   if (vendedorIds.length === 0) return new Map();

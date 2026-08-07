@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/PublicNav";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
 import { VendorBadge } from "@/components/VendorBadge";
-import { getPerfilVendedorPublico } from "@/lib/supabase/queries";
-import { calcularNivel } from "@/lib/niveles";
+import { getPerfilVendedorPublico, getVendedorDestacadoDelMes } from "@/lib/supabase/queries";
+import { calcularNivel, proximoNivel } from "@/lib/niveles";
 import { createClient } from "@/lib/supabase/server";
 import { publicUrl } from "@/lib/r2";
 import { TELEGRAM_URL } from "@/lib/telegram";
@@ -32,16 +32,26 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
   if (!perfil) notFound();
 
   const supabase = await createClient();
-  const { data: disenosData } = await supabase
-    .from("disenos")
-    .select("*")
-    .eq("vendedor_id", id)
-    .eq("estado", "publicado")
-    .order("es_pro", { ascending: false })
-    .order("created_at", { ascending: false });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [{ data: disenosData }, destacadoId] = await Promise.all([
+    supabase
+      .from("disenos")
+      .select("*")
+      .eq("vendedor_id", id)
+      .eq("estado", "publicado")
+      .order("es_pro", { ascending: false })
+      .order("created_at", { ascending: false }),
+    getVendedorDestacadoDelMes(),
+  ]);
 
   const disenos: Diseno[] = (disenosData ?? []).map((d) => ({ ...d, imagen_url: publicUrl(d.imagen_url) }));
   const nivel = calcularNivel(perfil.descargasTotales);
+  const esPropio = user?.id === perfil.id;
+  const esDestacado = destacadoId === perfil.id;
+  const progreso = esPropio ? proximoNivel(perfil.descargasTotales) : null;
 
   return (
     <>
@@ -49,6 +59,11 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
 
       <section className="border-b border-line py-16">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-8 text-center">
+          {esDestacado && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-navy to-navy-2 px-3.5 py-1.5 font-mono text-[11px] font-bold tracking-wide text-white uppercase before:content-['★'] before:text-orange">
+              Destacado del mes
+            </span>
+          )}
           <VendorBadge nivel={nivel} size="lg" />
           <div>
             <h1 className="font-display text-[30px] text-navy">{perfil.nombre}</h1>
@@ -64,6 +79,28 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
               <div className="font-mono text-[10px] tracking-widest text-text-dim uppercase">Descargas</div>
             </div>
           </div>
+
+          {esPropio && (
+            <div className="mt-2 w-full max-w-90 rounded-md border border-line bg-paper px-5 py-4">
+              {progreso ? (
+                <>
+                  <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-text-dim">
+                    <span>Te faltan {progreso.faltan} descargas para {progreso.siguiente.nombre}</span>
+                    <span>{progreso.porcentaje}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-sm bg-line">
+                    <div
+                      className="h-full rounded-sm bg-navy-2"
+                      style={{ width: `${progreso.porcentaje}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="font-mono text-[11px] text-navy-2">Llegaste al nivel máximo — Elite 🎉</p>
+              )}
+              <p className="mt-2 text-[10px] text-text-dim">Solo vos ves este progreso.</p>
+            </div>
+          )}
         </div>
       </section>
 
