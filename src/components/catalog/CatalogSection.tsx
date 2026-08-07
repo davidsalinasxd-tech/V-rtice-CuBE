@@ -24,7 +24,23 @@ function deporteSlug(deporte: string) {
   return "otro";
 }
 
-export function CatalogSection({ disenos }: { disenos: Diseno[] }) {
+export function CatalogSection({
+  disenos,
+  titulo = (
+    <>
+      Catálogo
+      <br />
+      reciente
+    </>
+  ),
+  subtitulo = "Nuevos kits cada semana. Filtra por deporte, club o formato de archivo.",
+  vendedorNombres,
+}: {
+  disenos: Diseno[];
+  titulo?: React.ReactNode;
+  subtitulo?: string;
+  vendedorNombres?: Map<string, string>;
+}) {
   const [query, setQuery] = useState("");
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["id"]>("todos");
   const [page, setPage] = useState(1);
@@ -53,14 +69,8 @@ export function CatalogSection({ disenos }: { disenos: Diseno[] }) {
     <section className="section border-t border-line bg-white py-22" id="catalogo">
       <div className="mx-auto max-w-6xl px-8">
         <div className="mb-11 flex flex-wrap items-end justify-between gap-6">
-          <h2 className="font-display text-[32px] leading-tight text-navy">
-            Catálogo
-            <br />
-            reciente
-          </h2>
-          <p className="max-w-85 text-[15px] text-text-dim">
-            Nuevos kits cada semana. Filtra por deporte, club o formato de archivo.
-          </p>
+          <h2 className="font-display text-[32px] leading-tight text-navy">{titulo}</h2>
+          <p className="max-w-85 text-[15px] text-text-dim">{subtitulo}</p>
         </div>
 
         <div className="mb-7">
@@ -112,7 +122,9 @@ export function CatalogSection({ disenos }: { disenos: Diseno[] }) {
               No encontramos diseños que coincidan. Probá con otra palabra o quitá el filtro.
             </div>
           ) : (
-            shown.map((d, i) => <DesignCard key={d.id} diseno={d} index={i} />)
+            shown.map((d, i) => (
+              <DesignCard key={d.id} diseno={d} index={i} vendedorNombre={vendedorNombres?.get(d.vendedor_id)} />
+            ))
           )}
         </div>
 

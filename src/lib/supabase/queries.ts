@@ -2,6 +2,58 @@ import { createClient } from "@/lib/supabase/server";
 import { publicUrl } from "@/lib/r2";
 import type { Diseno } from "@/lib/types/database";
 
+export type PerfilVendedorPublico = {
+  id: string;
+  nombre: string;
+  creadoEn: string;
+  disenosPublicados: number;
+  descargasTotales: number;
+};
+
+/** Perfil público de un vendedor aprobado: sin email ni ningún dato de contacto. */
+export async function getPerfilVendedorPublico(id: string): Promise<PerfilVendedorPublico | null> {
+  const supabase = await createClient();
+  const { data: perfil } = await supabase.from("perfiles_publicos").select("*").eq("id", id).maybeSingle();
+
+  if (!perfil) return null;
+
+  const { data: disenos } = await supabase
+    .from("disenos")
+    .select("id")
+    .eq("vendedor_id", id)
+    .eq("estado", "publicado");
+
+  const disenoIds = (disenos ?? []).map((d) => d.id);
+
+  let descargasTotales = 0;
+  if (disenoIds.length > 0) {
+    const { count } = await supabase
+      .from("descargas")
+      .select("id", { count: "exact", head: true })
+      .in("diseno_id", disenoIds)
+      .eq("cuenta_para_pago", true);
+    descargasTotales = count ?? 0;
+  }
+
+  return {
+    id: perfil.id,
+    nombre: perfil.nombre,
+    creadoEn: perfil.created_at,
+    disenosPublicados: disenoIds.length,
+    descargasTotales,
+  };
+}
+
+/** Nombres públicos de vendedores aprobados, para linkear desde el catálogo/ficha de producto. */
+export async function getNombresVendedores(vendedorIds: string[]): Promise<Map<string, string>> {
+  if (vendedorIds.length === 0) return new Map();
+
+  const supabase = await createClient();
+  const { data } = await supabase.from("perfiles_publicos").select("id, nombre").in("id", vendedorIds);
+
+  return new Map((data ?? []).map((p) => [p.id, p.nombre]));
+}
+
 function conImagenPublica(diseno: Diseno): Diseno {
   return { ...diseno, imagen_url: publicUrl(diseno.imagen_url) };
 }

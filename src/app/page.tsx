@@ -2,13 +2,16 @@ import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { HeroShowcase } from "@/components/HeroShowcase";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
-import { getDisenosPublicados, getDisenoMasDescargado } from "@/lib/supabase/queries";
+import { getDisenosPublicados, getDisenoMasDescargado, getNombresVendedores } from "@/lib/supabase/queries";
 import { disenosDeEjemplo } from "@/lib/seed-data";
 import { TELEGRAM_URL } from "@/lib/telegram";
 
 export default async function Home() {
   const disenos = await getDisenosPublicados();
   const catalogo = disenos.length > 0 ? disenos : disenosDeEjemplo;
+  const vendedorNombres = await getNombresVendedores([
+    ...new Set(catalogo.filter((d) => !d.es_oficial).map((d) => d.vendedor_id)),
+  ]);
 
   const novedad = [...catalogo].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -64,7 +67,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <CatalogSection disenos={catalogo} />
+      <CatalogSection disenos={catalogo} vendedorNombres={vendedorNombres} />
 
       <section className="border-t border-line bg-paper py-10">
         <div className="mx-auto max-w-4xl px-8 text-center">

@@ -7,25 +7,34 @@ function formatGs(precio: number) {
   return `Gs. ${precio.toLocaleString("es-PY")}`;
 }
 
-export function DesignCard({ diseno, index }: { diseno: Diseno; index: number }) {
+export function DesignCard({
+  diseno,
+  index,
+  vendedorNombre,
+}: {
+  diseno: Diseno;
+  index: number;
+  vendedorNombre?: string;
+}) {
   const codigo = codigoDeDiseno(diseno.id);
   const esGratis = diseno.es_gratis;
 
   return (
-    <Link
-      href={`/producto/${diseno.id}`}
-      className={`group relative block bg-white px-5.5 pt-6.5 pb-5.5 transition-all duration-250 hover:-translate-y-1.5 hover:shadow-[0_18px_32px_rgba(0,47,89,0.12)] ${
+    <div
+      className={`group relative bg-white px-5.5 pt-6.5 pb-5.5 transition-all duration-250 hover:-translate-y-1.5 hover:shadow-[0_18px_32px_rgba(0,47,89,0.12)] ${
         diseno.es_pro
           ? "border-1.5 border-transparent [background:linear-gradient(white,white)_padding-box,linear-gradient(135deg,var(--color-orange)_0%,var(--color-navy)_100%)_border-box] hover:shadow-[0_22px_40px_rgba(254,102,1,0.18)]"
           : ""
       }`}
     >
+      <Link href={`/producto/${diseno.id}`} className="absolute inset-0" aria-label={diseno.nombre} />
+
       {diseno.es_pro && (
-        <span className="absolute top-0 right-5.5 rounded-b bg-orange px-2 py-1 font-mono text-[9px] font-bold tracking-wider text-white">
+        <span className="pointer-events-none absolute top-0 right-5.5 rounded-b bg-orange px-2 py-1 font-mono text-[9px] font-bold tracking-wider text-white">
           DESTACADO
         </span>
       )}
-      <div className="mb-4 flex items-start justify-between">
+      <div className="pointer-events-none mb-4 flex items-start justify-between">
         <span className="font-display text-[34px] leading-none font-bold text-line-strong transition-colors group-hover:text-orange">
           {String(index + 1).padStart(2, "0")}
         </span>
@@ -44,7 +53,7 @@ export function DesignCard({ diseno, index }: { diseno: Diseno; index: number })
         )}
       </div>
 
-      <div className="mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border border-line bg-paper">
+      <div className="pointer-events-none mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border border-line bg-paper">
         {diseno.imagen_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={diseno.imagen_url} alt={diseno.nombre} className="h-full w-full object-contain" />
@@ -53,14 +62,28 @@ export function DesignCard({ diseno, index }: { diseno: Diseno; index: number })
         )}
       </div>
 
-      <span className="mb-0.5 block font-mono text-[10px] text-text-dim">{codigo}</span>
-      <h3 className="mb-1 text-[15px] font-semibold text-navy">{diseno.nombre}</h3>
+      <span className="pointer-events-none mb-0.5 block font-mono text-[10px] text-text-dim">{codigo}</span>
+      <h3 className="pointer-events-none mb-1 text-[15px] font-semibold text-navy">{diseno.nombre}</h3>
       <div className="mb-3.5 text-xs text-text-dim">
-        {diseno.deporte}
-        {diseno.es_oficial ? " · Diseño oficial Vértice Cube" : ` · ${diseno.formato}`}
+        <span className="pointer-events-none">{diseno.deporte}</span>
+        {diseno.es_oficial ? (
+          <span className="pointer-events-none"> · Diseño oficial Vértice Cube</span>
+        ) : vendedorNombre ? (
+          <>
+            <span className="pointer-events-none"> · </span>
+            <Link
+              href={`/vendedor/${diseno.vendedor_id}`}
+              className="relative z-10 hover:text-orange hover:underline"
+            >
+              {vendedorNombre}
+            </Link>
+          </>
+        ) : (
+          <span className="pointer-events-none"> · {diseno.formato}</span>
+        )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-line pt-3.5">
+      <div className="pointer-events-none flex items-center justify-between border-t border-line pt-3.5">
         <span className="font-mono text-[15px] font-bold text-navy">
           {esGratis ? "Gratis" : formatGs(diseno.precio)}
         </span>
@@ -69,8 +92,10 @@ export function DesignCard({ diseno, index }: { diseno: Diseno; index: number })
         </span>
       </div>
       {diseno.es_pro && (
-        <div className="mt-2.5 text-[11px] font-semibold text-orange">★ Incluido con la suscripción</div>
+        <div className="pointer-events-none mt-2.5 text-[11px] font-semibold text-orange">
+          ★ Incluido con la suscripción
+        </div>
       )}
-    </Link>
+    </div>
   );
 }

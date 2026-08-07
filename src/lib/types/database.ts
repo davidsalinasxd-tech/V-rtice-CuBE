@@ -74,6 +74,13 @@ export type SolicitudPago = {
   pagado_at: string | null
 }
 
+export type PerfilPublico = {
+  id: string
+  nombre: string
+  created_at: string
+  estado_vendedor: EstadoVendedor
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -114,7 +121,12 @@ export type Database = {
         Relationships: []
       }
     }
-    Views: Record<string, never>
+    Views: {
+      perfiles_publicos: {
+        Row: PerfilPublico
+        Relationships: []
+      }
+    }
     Functions: Record<string, never>
   }
 }

@@ -5,7 +5,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { HexIcon } from "@/components/HexIcon";
 import { DownloadButton } from "@/components/catalog/DownloadButton";
 import { codigoDeDiseno } from "@/lib/codigo";
-import { getDisenoPublicadoPorId } from "@/lib/supabase/queries";
+import { getDisenoPublicadoPorId, getNombresVendedores } from "@/lib/supabase/queries";
 import { getEstadoSuscripcion, getCupoDescargaExterna } from "@/lib/supabase/subscription";
 import { createClient } from "@/lib/supabase/server";
 import { TELEGRAM_URL } from "@/lib/telegram";
@@ -35,6 +35,9 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
   if (!diseno) notFound();
 
   const codigo = codigoDeDiseno(diseno.id);
+  const vendedorNombre = diseno.es_oficial
+    ? null
+    : (await getNombresVendedores([diseno.vendedor_id])).get(diseno.vendedor_id) ?? null;
 
   const supabase = await createClient();
   const {
@@ -83,7 +86,19 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
           </div>
           <h1 className="font-display mb-2.5 text-[32px] leading-tight text-navy">{diseno.nombre}</h1>
           <div className="mb-6.5 text-[13px] text-text-dim">
-            {codigo} · {diseno.es_oficial ? "Diseño oficial Vértice Cube" : "Vendedor externo"}
+            {codigo} ·{" "}
+            {diseno.es_oficial ? (
+              "Diseño oficial Vértice Cube"
+            ) : vendedorNombre ? (
+              <>
+                Por{" "}
+                <Link href={`/vendedor/${diseno.vendedor_id}`} className="text-navy-2 hover:text-orange">
+                  {vendedorNombre}
+                </Link>
+              </>
+            ) : (
+              "Vendedor externo"
+            )}
           </div>
 
           <div className="mb-7 grid grid-cols-3 gap-px border border-line bg-line">

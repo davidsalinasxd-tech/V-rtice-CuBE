@@ -137,6 +137,7 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
               {t.label}
             </SideLink>
           ))}
+          <SideLink href={`/vendedor/${user.id}`}>Ver mi perfil público →</SideLink>
           <SideLink href="/">Volver a la tienda</SideLink>
         </aside>
 
