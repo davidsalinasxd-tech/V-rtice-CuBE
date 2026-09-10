@@ -6,6 +6,31 @@ import { codigoDeDiseno } from "@/lib/codigo";
 import type { Diseno } from "@/lib/types/database";
 
 const PAGE_SIZE = 20;
+const PRO_POR_PAGINA = 4;
+
+/** Reparte los diseños PRO cada ~5 lugares en vez de amontonarlos todos al principio. */
+function intercalarPro(disenos: Diseno[]): Diseno[] {
+  const pro = disenos.filter((d) => d.es_pro);
+  const resto = disenos.filter((d) => !d.es_pro);
+  if (pro.length === 0 || resto.length === 0) return disenos;
+
+  const espaciado = Math.floor(PAGE_SIZE / PRO_POR_PAGINA);
+  const resultado: Diseno[] = [];
+  let pi = 0;
+  let ri = 0;
+
+  while (pi < pro.length || ri < resto.length) {
+    const turnoDePro = resultado.length % espaciado === 0;
+    if (turnoDePro && pi < pro.length) {
+      resultado.push(pro[pi++]);
+    } else if (ri < resto.length) {
+      resultado.push(resto[ri++]);
+    } else {
+      resultado.push(pro[pi++]);
+    }
+  }
+  return resultado;
+}
 
 const FILTROS = [
   { id: "todos", label: "Todos" },
@@ -45,9 +70,11 @@ export function CatalogSection({
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["id"]>("todos");
   const [page, setPage] = useState(1);
 
+  const disenosOrdenados = useMemo(() => intercalarPro(disenos), [disenos]);
+
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return disenos.filter((d) => {
+    return disenosOrdenados.filter((d) => {
       const sport = deporteSlug(d.deporte);
       let matchesFilter = true;
       if (filtro === "pro") matchesFilter = d.es_pro;
@@ -58,7 +85,7 @@ export function CatalogSection({
       const matchesQuery = q === "" || haystack.includes(q);
       return matchesFilter && matchesQuery;
     });
-  }, [disenos, query, filtro]);
+  }, [disenosOrdenados, query, filtro]);
 
   const isBrowsing = query.trim() === "" && filtro === "todos";
   const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));

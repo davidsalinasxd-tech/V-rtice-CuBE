@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { HeroShowcase } from "@/components/HeroShowcase";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
+import { DesignsMarquee } from "@/components/catalog/DesignsMarquee";
 import { getDisenosPublicados, getDisenoMasDescargado, getNombresVendedores } from "@/lib/supabase/queries";
 import { disenosDeEjemplo } from "@/lib/seed-data";
 import { TELEGRAM_URL } from "@/lib/telegram";
@@ -66,6 +67,8 @@ export default async function Home() {
           <HeroShowcase novedad={novedad} masDescargado={masDescargado} />
         </div>
       </section>
+
+      <DesignsMarquee disenos={catalogo.slice(0, 16)} />
 
       <CatalogSection disenos={catalogo} vendedorNombres={vendedorNombres} />
 
