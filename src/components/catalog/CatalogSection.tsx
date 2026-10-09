@@ -49,6 +49,54 @@ function deporteSlug(deporte: string) {
   return "otro";
 }
 
+type Variante = "claro" | "oscuro";
+
+/** Clases de cada variante. La clara es el aspecto de siempre (también lo usa el perfil público de vendedor). */
+const ESTILOS: Record<Variante, Record<string, string>> = {
+  claro: {
+    seccion: "section border-t border-line bg-white py-22",
+    titulo: "font-display text-[32px] leading-tight text-navy",
+    subtitulo: "max-w-85 text-[15px] text-text-dim",
+    icono: "text-text-dim",
+    input:
+      "w-full rounded-md border-1.5 border-line-strong bg-paper py-3.5 pr-4 pl-11 text-[15px] transition-colors focus:border-orange focus:bg-white focus:outline-none",
+    chip: "cursor-pointer rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors",
+    chipPro: "border-orange bg-orange text-white",
+    chipActivo: "border-navy bg-navy text-white",
+    chipInactivo: "border-line-strong bg-paper text-text-dim hover:border-navy hover:text-navy",
+    grilla: "grid grid-cols-1 gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4",
+    vacio: "col-span-full bg-white px-5 py-15 text-center text-sm text-text-dim",
+    contador: "font-mono text-xs text-text-dim",
+    flecha:
+      "min-w-9.5 cursor-pointer rounded-md border border-transparent bg-transparent px-1.5 py-2 font-mono text-sm text-text-dim hover:text-navy disabled:cursor-not-allowed disabled:opacity-35",
+    pagina: "h-9.5 min-w-9.5 cursor-pointer rounded-md border px-1.5 font-mono text-sm font-semibold",
+    paginaActiva: "border-navy bg-navy text-white",
+    paginaInactiva: "border-line-strong bg-white text-navy hover:border-navy",
+  },
+  oscuro: {
+    seccion: "py-[clamp(64px,8vw,104px)]",
+    titulo:
+      "font-display text-[length:clamp(34px,4vw,48px)] leading-[1.05] font-semibold tracking-[-.02em] text-white",
+    subtitulo: "max-w-85 text-[15px] leading-relaxed text-on-dark-dim",
+    icono: "text-on-dark-dim",
+    input:
+      "w-full rounded-xl border border-white/12 bg-white/4 py-3.75 pr-4 pl-11.5 text-[15px] text-white transition-[border-color,background-color,box-shadow] focus:border-orange focus:bg-white/7 focus:shadow-[0_0_0_3px_rgba(254,102,1,.15)] focus:outline-none",
+    chip: "cursor-pointer rounded-full border px-3.75 py-2.25 text-[12.5px] font-semibold transition-colors",
+    chipPro: "border-orange bg-orange text-[#0a111d]",
+    chipActivo: "border-[rgba(120,170,230,.45)] bg-navy text-white",
+    chipInactivo: "border-white/12 bg-white/4 text-[#b5c3d4] hover:border-white/35 hover:text-white",
+    grilla: "grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3.5",
+    vacio:
+      "glass-card col-span-full rounded-2xl px-5 py-15 text-center text-sm text-on-dark-dim",
+    contador: "font-mono text-xs text-on-dark-dim",
+    flecha:
+      "min-w-9.5 cursor-pointer rounded-lg border border-transparent bg-transparent px-1.5 py-2 font-mono text-sm text-on-dark-dim hover:text-white disabled:cursor-not-allowed disabled:opacity-35",
+    pagina: "h-9.5 min-w-9.5 cursor-pointer rounded-lg border px-1.5 font-mono text-sm font-semibold",
+    paginaActiva: "border-[rgba(120,170,230,.45)] bg-navy text-white",
+    paginaInactiva: "border-white/12 bg-white/4 text-[#b5c3d4] hover:border-white/35 hover:text-white",
+  },
+};
+
 export function CatalogSection({
   disenos,
   titulo = (
@@ -60,12 +108,16 @@ export function CatalogSection({
   ),
   subtitulo = "Nuevos kits cada semana. Filtra por deporte, club o formato de archivo.",
   vendedorNombres,
+  variante = "claro",
 }: {
   disenos: Diseno[];
   titulo?: React.ReactNode;
   subtitulo?: string;
   vendedorNombres?: Map<string, string>;
+  variante?: Variante;
 }) {
+  const estilos = ESTILOS[variante];
+  const oscuro = variante === "oscuro";
   const [query, setQuery] = useState("");
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["id"]>("todos");
   const [page, setPage] = useState(1);
@@ -93,22 +145,26 @@ export function CatalogSection({
   const shown = isBrowsing ? matches.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE) : matches;
 
   return (
-    <section className="section border-t border-line bg-white py-22" id="catalogo">
-      <div className="mx-auto max-w-6xl px-8">
-        <div className="mb-11 flex flex-wrap items-end justify-between gap-6">
-          <h2 className="font-display text-[32px] leading-tight text-navy">{titulo}</h2>
-          <p className="max-w-85 text-[15px] text-text-dim">{subtitulo}</p>
+    <section className={estilos.seccion} id="catalogo">
+      <div className={oscuro ? "mx-auto max-w-6xl px-[clamp(20px,3vw,32px)]" : "mx-auto max-w-6xl px-8"}>
+        <div
+          {...(oscuro ? { "data-reveal": "" } : {})}
+          className="mb-11 flex flex-wrap items-end justify-between gap-6"
+        >
+          <h2 className={estilos.titulo}>{titulo}</h2>
+          <p className={estilos.subtitulo}>{subtitulo}</p>
         </div>
 
-        <div className="mb-7">
+        <div {...(oscuro ? { "data-reveal": "" } : {})} className="mb-7">
           <div className="relative mb-4.5">
             <svg
               viewBox="0 0 24 24"
               fill="none"
-              className="pointer-events-none absolute top-1/2 left-4 h-4.5 w-4.5 -translate-y-1/2"
+              aria-hidden="true"
+              className={`pointer-events-none absolute top-1/2 left-4 h-4.5 w-4.5 -translate-y-1/2 ${estilos.icono}`}
             >
-              <circle cx="11" cy="11" r="7" stroke="var(--color-text-dim)" strokeWidth="2" />
-              <path d="M20 20L16.5 16.5" stroke="var(--color-text-dim)" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+              <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <input
               type="text"
@@ -118,7 +174,7 @@ export function CatalogSection({
                 setPage(1);
               }}
               placeholder="Buscar por nombre, código (KIT-0142) o etiqueta..."
-              className="w-full rounded-md border-1.5 border-line-strong bg-paper py-3.5 pr-4 pl-11 text-[15px] transition-colors focus:border-orange focus:bg-white focus:outline-none"
+              className={estilos.input}
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -129,12 +185,8 @@ export function CatalogSection({
                   setFiltro(f.id);
                   setPage(1);
                 }}
-                className={`cursor-pointer rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors ${
-                  filtro === f.id
-                    ? f.id === "pro"
-                      ? "border-orange bg-orange text-white"
-                      : "border-navy bg-navy text-white"
-                    : "border-line-strong bg-paper text-text-dim hover:border-navy hover:text-navy"
+                className={`${estilos.chip} ${
+                  filtro === f.id ? (f.id === "pro" ? estilos.chipPro : estilos.chipActivo) : estilos.chipInactivo
                 }`}
               >
                 {f.label}
@@ -143,20 +195,26 @@ export function CatalogSection({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+        <div className={estilos.grilla}>
           {shown.length === 0 ? (
-            <div className="col-span-full bg-white px-5 py-15 text-center text-sm text-text-dim">
+            <div className={estilos.vacio}>
               No encontramos diseños que coincidan. Probá con otra palabra o quitá el filtro.
             </div>
           ) : (
             shown.map((d, i) => (
-              <DesignCard key={d.id} diseno={d} index={i} vendedorNombre={vendedorNombres?.get(d.vendedor_id)} />
+              <DesignCard
+                key={d.id}
+                diseno={d}
+                index={i}
+                vendedorNombre={vendedorNombres?.get(d.vendedor_id)}
+                variante={variante}
+              />
             ))
           )}
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-3.5">
-          <span className="font-mono text-xs text-text-dim">
+          <span className={estilos.contador}>
             {isBrowsing
               ? `${matches.length} diseños en total`
               : `${matches.length} resultado${matches.length === 1 ? "" : "s"}`}
@@ -166,7 +224,7 @@ export function CatalogSection({
               <button
                 disabled={currentPage === 1}
                 onClick={() => setPage(currentPage - 1)}
-                className="min-w-9.5 cursor-pointer rounded-md border border-transparent bg-transparent px-1.5 py-2 font-mono text-sm text-text-dim hover:text-navy disabled:cursor-not-allowed disabled:opacity-35"
+                className={estilos.flecha}
               >
                 ‹
               </button>
@@ -174,11 +232,7 @@ export function CatalogSection({
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`h-9.5 min-w-9.5 cursor-pointer rounded-md border px-1.5 font-mono text-sm font-semibold ${
-                    p === currentPage
-                      ? "border-navy bg-navy text-white"
-                      : "border-line-strong bg-white text-navy hover:border-navy"
-                  }`}
+                  className={`${estilos.pagina} ${p === currentPage ? estilos.paginaActiva : estilos.paginaInactiva}`}
                 >
                   {p}
                 </button>
@@ -186,7 +240,7 @@ export function CatalogSection({
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setPage(currentPage + 1)}
-                className="min-w-9.5 cursor-pointer rounded-md border border-transparent bg-transparent px-1.5 py-2 font-mono text-sm text-text-dim hover:text-navy disabled:cursor-not-allowed disabled:opacity-35"
+                className={estilos.flecha}
               >
                 ›
               </button>

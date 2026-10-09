@@ -10,6 +10,15 @@
   --color-orange-2: #ff7c24;
   --color-line: rgba(0, 47, 89, 0.12);
   --color-line-strong: rgba(0, 47, 89, 0.22);
+
+  /* Tema "espacio oscuro" (home). Se suman a los tokens claros, no los reemplazan. */
+  --color-space: #020610;
+  --color-space-deep: #04203f;
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-line: rgba(255, 255, 255, 0.11);
+  --color-on-dark: #ffffff;
+  --color-on-dark-dim: #9fb0c4;
+  --color-btn-base: #0a111d;
 }
 
 @theme inline {
@@ -22,6 +31,13 @@
   --color-orange-2: var(--color-orange-2);
   --color-line: var(--color-line);
   --color-line-strong: var(--color-line-strong);
+  --color-space: var(--color-space);
+  --color-space-deep: var(--color-space-deep);
+  --color-glass: var(--color-glass);
+  --color-glass-line: var(--color-glass-line);
+  --color-on-dark: var(--color-on-dark);
+  --color-on-dark-dim: var(--color-on-dark-dim);
+  --color-btn-base: var(--color-btn-base);
   --font-display: var(--font-space-grotesk);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
@@ -119,4 +135,363 @@ body {
 
 .marquee-track:hover {
   animation-play-state: paused;
+}
+
+/* ==========================================================================
+   Tema "espacio oscuro" — solo se activa dentro de .theme-space (la home).
+   Las demás pantallas conservan el aspecto claro de siempre.
+   ========================================================================== */
+
+/* Las clases propias van en @layer components para que las utilidades de Tailwind
+   (hover:, md:, etc.) puedan sobrescribirlas; el CSS sin capa les ganaría siempre. */
+@layer components {
+.theme-space {
+  background: linear-gradient(
+    180deg,
+    var(--color-space) 0%,
+    var(--color-space) 55%,
+    #03142a 88%,
+    var(--color-space-deep) 100%
+  );
+  color: var(--color-on-dark);
+  overflow-x: clip;
+}
+
+.theme-space ::selection {
+  background: rgba(254, 102, 1, 0.35);
+}
+
+.theme-space input::placeholder {
+  color: #7f90a6;
+}
+
+/* Foco visible en enlaces, botones y chips (los inputs tienen su propio foco naranja). */
+.theme-space :is(a, button, [role="button"], summary):focus-visible {
+  outline: 2px solid var(--color-orange-2);
+  outline-offset: 3px;
+}
+}
+
+/* --- Fondo animado: solo transform y opacity ------------------------------ */
+
+@keyframes twinkle-a {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes twinkle-b {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes aurora-a {
+  from {
+    transform: translate3d(-6%, 0, 0);
+  }
+  to {
+    transform: translate3d(8%, 6%, 0);
+  }
+}
+
+@keyframes aurora-b {
+  from {
+    transform: translate3d(6%, 4%, 0);
+  }
+  to {
+    transform: translate3d(-8%, -4%, 0);
+  }
+}
+
+@keyframes hex-float {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(0, -18px, 0) rotate(4deg);
+  }
+}
+
+.twinkle-a {
+  animation: twinkle-a 5s ease-in-out infinite alternate;
+}
+
+.twinkle-b {
+  animation: twinkle-b 3.6s ease-in-out infinite alternate;
+}
+
+.aurora-a {
+  animation: aurora-a 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.aurora-b {
+  animation: aurora-b 32s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.hex-float {
+  animation: hex-float 18s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twinkle-a,
+  .twinkle-b,
+  .aurora-a,
+  .aurora-b,
+  .hex-float {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+@layer components {
+/* --- Hero: velo para garantizar contraste del texto sobre el anillo ------- */
+
+.hero-veil {
+  background:
+    radial-gradient(120% 70% at 50% 66%, rgba(2, 6, 16, 0) 35%, rgba(2, 6, 16, 0.8) 80%),
+    linear-gradient(
+      90deg,
+      rgba(2, 6, 16, 0.9) 0%,
+      rgba(2, 6, 16, 0.62) 38%,
+      rgba(2, 6, 16, 0.18) 62%,
+      rgba(2, 6, 16, 0.45) 100%
+    ),
+    linear-gradient(180deg, rgba(2, 6, 16, 0.55) 0%, rgba(2, 6, 16, 0) 22%, rgba(2, 6, 16, 0) 72%, var(--color-space) 100%);
+}
+
+/* --- Anillo 3D de diseños ------------------------------------------------- */
+
+.ring-wrap {
+  /* --w lo reescribe el JS con el mismo cálculo; este valor es el de respaldo previo a la hidratación. */
+  --w: clamp(88px, 11vw, 150px);
+  perspective: calc(var(--w) * 6.85);
+  perspective-origin: 50% calc(66% + var(--w) * 1.5);
+}
+
+.ring-card {
+  position: absolute;
+  left: calc(var(--w) / -2);
+  top: calc(var(--w) * -0.75);
+  width: var(--w);
+  height: calc(var(--w) * 1.5);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--w) * 0.04);
+  padding: calc(var(--w) * 0.05);
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--color-paper);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Oscurece la tarjeta según su ángulo; equivale al brightness() pero anima solo opacity. */
+.ring-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ring-media {
+  aspect-ratio: 1080 / 1129;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.ring-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ring-fallback {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-media[data-fallo] img {
+  display: none;
+}
+
+.ring-media[data-fallo] .ring-fallback {
+  display: flex;
+}
+
+.ring-code {
+  padding: 0 calc(var(--w) * 0.03);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: max(8px, calc(var(--w) * 0.065));
+  color: var(--color-text-dim);
+}
+
+.ring-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  padding: 0 calc(var(--w) * 0.03);
+  font-size: max(9px, calc(var(--w) * 0.075));
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-navy);
+}
+
+/* --- Vidrio, botones y navegación ---------------------------------------- */
+
+.glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-pill {
+  border: 1px solid var(--color-glass-line);
+  background: rgba(10, 17, 29, 0.55);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Acción principal: fondo casi negro con la luz naranja acumulada abajo. */
+.btn-glow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  padding: 17px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(
+    0deg,
+    #ffd9b8 0,
+    #ff7c24 2px,
+    #fe6601 7px,
+    #b24400 14px,
+    #3a1c0a 24px,
+    var(--color-btn-base) 34px
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 4px 8px rgba(254, 102, 1, 0.1);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s;
+}
+
+.btn-glow:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.12);
+}
+
+.btn-glow:active {
+  transform: translateY(0);
+}
+
+/* Acción secundaria: vidrio con borde fino. */
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  padding: 17px 26px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.btn-glass:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-underline {
+  background: linear-gradient(var(--color-orange), var(--color-orange)) no-repeat 0 100% / 0% 1px;
+  transition:
+    color 0.2s,
+    background-size 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-underline:hover,
+.nav-underline:focus-visible {
+  color: #fff;
+  background-size: 100% 1px;
+}
+
+/* --- Panel del hero (vidrio con leve inclinación 3D) ---------------------- */
+
+.hero-panel-scene {
+  perspective: 1200px;
+}
+
+.hero-panel {
+  border: 1px solid var(--color-glass-line);
+  background: linear-gradient(180deg, rgba(20, 30, 46, 0.72), rgba(8, 14, 26, 0.78));
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    0 0 90px rgba(0, 70, 140, 0.45);
+  transform: rotateY(-7deg) rotateX(4deg);
+  transition:
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.6s;
+}
+
+.hero-panel:hover {
+  transform: rotateY(-2deg) rotateX(1deg) translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 36px 70px rgba(0, 0, 0, 0.55),
+    0 0 110px rgba(0, 90, 170, 0.55);
+}
+
+/* --- Banda de suscripción ------------------------------------------------- */
+
+.band-glow {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(80% 140% at 15% 0%, rgba(0, 47, 89, 0.95) 0%, rgba(0, 47, 89, 0.35) 55%, rgba(2, 6, 16, 0) 100%),
+    radial-gradient(40% 120% at 95% 100%, rgba(254, 102, 1, 0.14), rgba(254, 102, 1, 0) 70%);
+}
 }
