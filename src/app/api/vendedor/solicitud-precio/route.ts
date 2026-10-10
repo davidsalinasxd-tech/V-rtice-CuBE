@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { esUuid, leerJson, precioValido } from "@/lib/validacion";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -11,15 +12,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { disenoId, esGratis, precio } = body as {
-    disenoId?: string;
-    esGratis?: boolean;
-    precio?: number;
-  };
+  const body = await leerJson(request);
+  const disenoId = body?.disenoId;
+  const esGratis = body?.esGratis;
 
-  if (!disenoId || typeof esGratis !== "boolean") {
+  if (!esUuid(disenoId) || typeof esGratis !== "boolean") {
     return NextResponse.json({ error: "Faltan datos de la solicitud." }, { status: 400 });
+  }
+
+  const precio = esGratis ? 0 : precioValido(body?.precio);
+  if (precio === null) {
+    return NextResponse.json({ error: "El precio tiene que ser un número entero entre 1 y 10.000.000 Gs." }, { status: 400 });
   }
 
   const { data: diseno, error: findError } = await supabase
@@ -49,7 +52,7 @@ export async function POST(request: Request) {
       diseno_id: disenoId,
       vendedor_id: user.id,
       es_gratis: esGratis,
-      precio: esGratis ? 0 : (precio ?? 0),
+      precio,
     })
     .select()
     .single();

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ensurePerfil } from "@/lib/supabase/perfil";
 import { isAdminEmail } from "@/lib/admin";
 import { R2_LIMITS } from "@/lib/r2";
+import { leerJson, precioValido, texto } from "@/lib/validacion";
 
 const inicioDeMes = () => {
   const d = new Date();
@@ -27,19 +28,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json();
-  const { nombre, deporte, formato, esGratis, precio, autoriaConfirmada, esOficial } = body as {
-    nombre?: string;
-    deporte?: string;
-    formato?: string;
-    esGratis?: boolean;
-    precio?: number;
-    autoriaConfirmada?: boolean;
-    esOficial?: boolean;
-  };
+  const body = await leerJson(request);
+  const nombre = texto(body?.nombre, 120);
+  const deporte = texto(body?.deporte, 40);
+  const formato = body?.formato === undefined || body.formato === "" ? "AI + PSD + PDF" : texto(body.formato, 60);
+  const esGratis = body?.esGratis === false ? false : true;
+  const autoriaConfirmada = body?.autoriaConfirmada === true;
+  const esOficial = body?.esOficial === true;
 
-  if (!nombre || !deporte) {
+  if (!nombre || !deporte || !formato) {
     return NextResponse.json({ error: "Nombre y deporte son obligatorios." }, { status: 400 });
+  }
+
+  const precio = esGratis ? 0 : precioValido(body?.precio);
+  if (precio === null) {
+    return NextResponse.json({ error: "El precio tiene que ser un número entero entre 1 y 10.000.000 Gs." }, { status: 400 });
   }
 
   if (!autoriaConfirmada) {
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
 
   // Los diseños oficiales (subidos por el dueño de la plataforma) no pasan por
   // revisión ni por los límites de espacio de vendedores externos.
-  const oficial = esOficial === true && isAdminEmail(user.email);
+  const oficial = esOficial && isAdminEmail(user.email);
 
   if (!oficial) {
     const { data: perfilVendedor } = await supabase
@@ -102,9 +105,9 @@ export async function POST(request: Request) {
       vendedor_id: user.id,
       nombre,
       deporte,
-      formato: formato ?? "AI + PSD + PDF",
-      es_gratis: esGratis ?? true,
-      precio: esGratis ? 0 : (precio ?? 0),
+      formato,
+      es_gratis: esGratis,
+      precio,
       autoria_confirmada: true,
       estado: oficial ? "publicado" : "revision",
       es_oficial: oficial,
@@ -114,7 +117,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "No se pudo crear el diseño. Probá de nuevo." }, { status: 500 });
   }
 
   return NextResponse.json({ diseno: data });

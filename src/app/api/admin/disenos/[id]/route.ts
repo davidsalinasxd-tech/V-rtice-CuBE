@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
-import { deleteObject } from "@/lib/r2";
+import { borrarArchivosDeDiseno } from "@/lib/r2";
+import { esUuid, leerJson, precioValido } from "@/lib/validacion";
 
 function mensajeDeError(message: string) {
   if (message.includes("Cannot coerce the result to a single JSON object")) {
     return "No se pudo actualizar el diseño: falta permiso de administrador (RLS) en la tabla disenos.";
   }
-  return message;
+  console.error("Admin disenos:", message);
+  return "No se pudo completar la operación.";
 }
 
 export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/disenos/[id]">) {
@@ -21,12 +23,13 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
     return NextResponse.json({ error: "No autorizado." }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { accion, esGratis, precio } = body as {
-    accion?: "aprobar" | "rechazar" | "editar";
-    esGratis?: boolean;
-    precio?: number;
-  };
+  if (!esUuid(id)) {
+    return NextResponse.json({ error: "Diseño no encontrado." }, { status: 404 });
+  }
+
+  const body = await leerJson(request);
+  const accion = body?.accion;
+  const esGratis = body?.esGratis;
 
   if (accion !== "aprobar" && accion !== "rechazar" && accion !== "editar") {
     return NextResponse.json({ error: "Acción inválida." }, { status: 400 });
@@ -36,9 +39,13 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
     if (typeof esGratis !== "boolean") {
       return NextResponse.json({ error: "Falta indicar si es gratis." }, { status: 400 });
     }
+    const precio = esGratis ? 0 : precioValido(body?.precio);
+    if (precio === null) {
+      return NextResponse.json({ error: "El precio tiene que ser un número entero entre 1 y 10.000.000 Gs." }, { status: 400 });
+    }
     const { data, error } = await supabase
       .from("disenos")
-      .update({ es_gratis: esGratis, precio: esGratis ? 0 : (precio ?? 0) })
+      .update({ es_gratis: esGratis, precio })
       .eq("id", id)
       .select()
       .single();
@@ -58,6 +65,9 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
   }
 
   if (accion === "aprobar") {
+    if (!diseno.rar_url || !diseno.imagen_url) {
+      return NextResponse.json({ error: "El diseño todavía no tiene sus archivos subidos." }, { status: 409 });
+    }
     const { data, error } = await supabase
       .from("disenos")
       .update({ estado: "publicado" })
@@ -70,10 +80,7 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/admin/dise
   }
 
   // Rechazar: borra los archivos de R2 en el momento (regla de negocio) y marca el estado.
-  await Promise.all([
-    diseno.rar_url ? deleteObject(diseno.rar_url).catch(() => {}) : Promise.resolve(),
-    diseno.imagen_url ? deleteObject(diseno.imagen_url).catch(() => {}) : Promise.resolve(),
-  ]);
+  await borrarArchivosDeDiseno(diseno);
 
   const { data, error } = await supabase
     .from("disenos")
@@ -103,10 +110,7 @@ export async function DELETE(request: Request, ctx: RouteContext<"/api/admin/dis
     return NextResponse.json({ error: "Diseño no encontrado." }, { status: 404 });
   }
 
-  await Promise.all([
-    diseno.rar_url ? deleteObject(diseno.rar_url).catch(() => {}) : Promise.resolve(),
-    diseno.imagen_url ? deleteObject(diseno.imagen_url).catch(() => {}) : Promise.resolve(),
-  ]);
+  await borrarArchivosDeDiseno(diseno);
 
   const { error } = await supabase.from("disenos").delete().eq("id", id);
 

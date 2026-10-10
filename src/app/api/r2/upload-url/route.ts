@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { R2_LIMITS, disenoImagenKey, disenoRarKey, getUploadUrl } from "@/lib/r2";
+import { isAdminEmail } from "@/lib/admin";
+import {
+  EXTENSION_POR_TIPO_IMAGEN,
+  R2_LIMITS,
+  TIPOS_RAR,
+  disenoImagenKey,
+  disenoRarKey,
+  getUploadUrl,
+} from "@/lib/r2";
+import { enteroEnRango, esUuid, leerJson } from "@/lib/validacion";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -12,22 +21,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { disenoId, kind, contentType, sizeBytes, extension } = body as {
-    disenoId?: string;
-    kind?: "rar" | "imagen";
-    contentType?: string;
-    sizeBytes?: number;
-    extension?: string;
-  };
+  const body = await leerJson(request);
+  const disenoId = body?.disenoId;
+  const kind = body?.kind;
+  const contentType = body?.contentType;
 
-  if (!disenoId || !kind || !contentType || !sizeBytes) {
+  if (!esUuid(disenoId) || (kind !== "rar" && kind !== "imagen") || typeof contentType !== "string") {
     return NextResponse.json({ error: "Faltan datos del archivo." }, { status: 400 });
+  }
+
+  const maxBytes = kind === "rar" ? R2_LIMITS.MAX_RAR_BYTES : R2_LIMITS.MAX_IMAGEN_BYTES;
+  const sizeBytes = enteroEnRango(body?.sizeBytes, 1, maxBytes);
+  if (sizeBytes === null) {
+    return NextResponse.json(
+      { error: kind === "rar" ? "El archivo .rar supera el máximo de 50 MB." : "La imagen de portada supera el máximo de 3 MB." },
+      { status: 400 },
+    );
   }
 
   const { data: diseno, error } = await supabase
     .from("disenos")
-    .select("id, vendedor_id")
+    .select("id, vendedor_id, estado")
     .eq("id", disenoId)
     .single();
 
@@ -39,19 +53,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autorizado." }, { status: 403 });
   }
 
+  // Solo se sube mientras el diseño está en revisión (o es un oficial del admin):
+  // un diseño ya publicado no puede cambiar su archivo por debajo de los compradores.
+  if (diseno.estado !== "revision" && !isAdminEmail(user.email)) {
+    return NextResponse.json({ error: "Este diseño ya no admite cambios de archivo." }, { status: 409 });
+  }
+
   if (kind === "rar") {
-    if (sizeBytes > R2_LIMITS.MAX_RAR_BYTES) {
-      return NextResponse.json({ error: "El archivo .rar supera el máximo de 50 MB." }, { status: 400 });
+    if (!(TIPOS_RAR as readonly string[]).includes(contentType)) {
+      return NextResponse.json({ error: "El archivo debe ser un .rar." }, { status: 400 });
     }
     const key = disenoRarKey(diseno.id);
-    const url = await getUploadUrl(key, contentType);
+    const url = await getUploadUrl(key, contentType, sizeBytes);
     return NextResponse.json({ url, key });
   }
 
-  if (sizeBytes > R2_LIMITS.MAX_IMAGEN_BYTES) {
-    return NextResponse.json({ error: "La imagen de portada supera el máximo de 3 MB." }, { status: 400 });
+  const extension = EXTENSION_POR_TIPO_IMAGEN[contentType];
+  if (!extension) {
+    return NextResponse.json({ error: "La portada debe ser JPG, PNG o WEBP." }, { status: 400 });
   }
-  const key = disenoImagenKey(diseno.id, extension ?? "jpg");
-  const url = await getUploadUrl(key, contentType);
+  const key = disenoImagenKey(diseno.id, extension);
+  const url = await getUploadUrl(key, contentType, sizeBytes);
   return NextResponse.json({ url, key });
 }

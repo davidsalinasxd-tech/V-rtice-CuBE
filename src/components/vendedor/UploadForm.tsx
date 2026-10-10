@@ -20,21 +20,17 @@ export function UploadForm({ esOficial = false }: { esOficial?: boolean } = {}) 
   const neto = precio ? Math.round(parseInt(precio, 10) * 0.8) : 0;
 
   async function subirArchivo(disenoId: string, kind: "rar" | "imagen", file: File) {
+    // El tipo y el tamaño quedan firmados en la URL: el PUT tiene que mandar exactamente lo mismo.
+    const contentType = file.type || "application/octet-stream";
     const res = await fetch("/api/r2/upload-url", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        disenoId,
-        kind,
-        contentType: file.type || "application/octet-stream",
-        sizeBytes: file.size,
-        extension: file.name.split(".").pop(),
-      }),
+      body: JSON.stringify({ disenoId, kind, contentType, sizeBytes: file.size }),
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error ?? "No se pudo generar la URL de subida.");
 
-    const put = await fetch(json.url, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+    const put = await fetch(json.url, { method: "PUT", headers: { "Content-Type": contentType }, body: file });
     if (!put.ok) throw new Error(`Falló la subida a R2 (${kind}).`);
 
     return json.key as string;
@@ -113,7 +109,7 @@ export function UploadForm({ esOficial = false }: { esOficial?: boolean } = {}) 
           etiqueta="IMG"
           instrucciones="Arrastrá tu imagen ya exportada con el marco"
           hint="JPG · máx. 3 MB · sin el marco oficial no se aprueba"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           maxBytes={MAX_IMG_BYTES}
           file={imgFile}
           onFile={setImgFile}
