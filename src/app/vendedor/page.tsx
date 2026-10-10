@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Logo } from "@/components/Logo";
+import { NavOscuroSimple, PaginaOscura } from "@/components/PaginaOscura";
 import { HexIcon } from "@/components/HexIcon";
 import { UploadForm } from "@/components/vendedor/UploadForm";
 import { MetodoCobroForm } from "@/components/vendedor/MetodoCobroForm";
@@ -53,24 +53,21 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
 
   if (!esVendedorAprobado) {
     return (
-      <>
-        <nav className="border-b border-line">
-          <div className="mx-auto flex h-19 max-w-6xl items-center justify-between px-8">
-            <Logo />
-            <form action={cerrarSesion}>
-              <button
-                type="submit"
-                className="cursor-pointer text-sm font-medium text-text-dim transition-colors hover:text-navy"
-              >
-                Salir
-              </button>
-            </form>
-          </div>
-        </nav>
+      <PaginaOscura>
+        <NavOscuroSimple>
+          <form action={cerrarSesion}>
+            <button
+              type="submit"
+              className="cursor-pointer px-1 py-2 text-sm font-medium text-[#b5c3d4] transition-colors hover:text-white"
+            >
+              Salir
+            </button>
+          </form>
+        </NavOscuroSimple>
         <div className="mx-auto max-w-lg px-8 py-24 text-center">
           <SolicitudVendedor estado={estadoVendedor} />
         </div>
-      </>
+      </PaginaOscura>
     );
   }
 
@@ -110,25 +107,22 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
     .toUpperCase();
 
   return (
-    <>
-      <nav className="border-b border-line">
-        <div className="mx-auto flex h-19 max-w-6xl items-center justify-between px-8">
-          <Logo />
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy font-display text-sm font-bold text-white">
-              {iniciales || "V"}
-            </div>
-            <form action={cerrarSesion}>
-              <button
-                type="submit"
-                className="cursor-pointer text-sm font-medium text-text-dim transition-colors hover:text-navy"
-              >
-                Salir
-              </button>
-            </form>
+    <PaginaOscura>
+      <NavOscuroSimple>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-glass-line bg-navy font-display text-sm font-bold text-white">
+            {iniciales || "V"}
           </div>
+          <form action={cerrarSesion}>
+            <button
+              type="submit"
+              className="cursor-pointer px-1 py-2 text-sm font-medium text-[#b5c3d4] transition-colors hover:text-white"
+            >
+              Salir
+            </button>
+          </form>
         </div>
-      </nav>
+      </NavOscuroSimple>
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-[220px_1fr]">
         <aside className="border-r border-line px-5 py-8 md:min-h-[calc(100vh-77px)]">
@@ -305,7 +299,7 @@ export default async function VendedorPage(props: PageProps<"/vendedor">) {
           )}
         </div>
       </div>
-    </>
+    </PaginaOscura>
   );
 }
 

@@ -495,3 +495,70 @@ body {
     radial-gradient(40% 120% at 95% 100%, rgba(254, 102, 1, 0.14), rgba(254, 102, 1, 0) 70%);
 }
 }
+
+/* ==========================================================================
+   Pantallas internas en modo oscuro (.theme-legacy, dentro de .theme-space).
+   Reinterpreta los colores claros de siempre sin tocar cada componente. Va SIN capa
+   a propósito: así gana sobre las utilidades de Tailwind (bg-white, rounded-sm...).
+   ========================================================================== */
+.theme-legacy {
+  color-scheme: dark;
+  --color-ink: #f2f5f9;
+  --color-text-dim: #9fb0c4;
+  --color-paper: rgba(255, 255, 255, 0.05);
+  --color-navy: #dbe7f5;
+  --color-navy-2: #8db8ea;
+  --color-line: rgba(255, 255, 255, 0.1);
+  --color-line-strong: rgba(255, 255, 255, 0.18);
+}
+
+.theme-legacy .bg-white {
+  background-color: rgba(255, 255, 255, 0.045);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.theme-legacy .bg-navy {
+  background-color: #0a3e68;
+}
+
+.theme-legacy .bg-navy-2 {
+  background-color: #0e4f86;
+}
+
+.theme-legacy .rounded-\[3px\],
+.theme-legacy .rounded-sm {
+  border-radius: 10px;
+}
+
+.theme-legacy .rounded-lg {
+  border-radius: 18px;
+}
+
+.theme-legacy [class*="shadow-["] {
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.theme-legacy select option {
+  background: #0a111d;
+  color: #fff;
+}
+
+.theme-legacy input:-webkit-autofill {
+  -webkit-text-fill-color: #fff;
+  box-shadow: 0 0 0 100px #0f1b2d inset;
+}
+
+/* Cuadrículas de celdas separadas por 1px (bg-line + celdas bg-white): celdas oscuras, línea fina clara. */
+.theme-legacy .bg-line > .bg-white {
+  background-color: #060d1a;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.theme-legacy .border-dashed {
+  border-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.02);
+}

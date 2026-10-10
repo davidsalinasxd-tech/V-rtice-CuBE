@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
+import { PaginaOscura } from "@/components/PaginaOscura";
 import { SUSCRIPCION } from "@/lib/r2";
 import { TELEGRAM_URL, linkTelegramSuscripcion } from "@/lib/telegram";
 
@@ -31,15 +32,17 @@ const BENEFICIOS = [
 
 export default function SuscripcionPage() {
   return (
-    <>
-      <PublicNav />
+    <PaginaOscura>
+      <div className="px-[clamp(12px,3vw,24px)] pt-4">
+        <PublicNav variante="oscuro" />
+      </div>
 
-      <section className="relative overflow-hidden border-b border-line py-20">
+      <section className="relative overflow-hidden border-b border-line py-[clamp(56px,8vw,96px)]">
         <div className="mx-auto max-w-3xl px-8 text-center">
-          <span className="mb-4.5 block font-mono text-xs font-bold tracking-widest text-orange uppercase">
+          <span className="mb-4.5 block font-mono text-xs font-bold tracking-widest text-orange-2 uppercase">
             Suscripción mensual
           </span>
-          <h1 className="font-display mb-5.5 text-[40px] leading-tight text-navy sm:text-[52px]">
+          <h1 className="font-display mb-5.5 text-[40px] leading-tight font-semibold tracking-[-.02em] text-white sm:text-[56px]">
             Todo el catálogo PRO,
             <br />
             un solo pago al mes
@@ -49,9 +52,9 @@ export default function SuscripcionPage() {
             diseños PRO/oficiales y un cupo mensual de diseños de vendedores externos.
           </p>
 
-          <div className="mx-auto mb-9 w-fit rounded-lg border-1.5 border-line-strong bg-white px-10 py-7 shadow-[0_20px_40px_rgba(0,47,89,0.08)]">
+          <div className="glass-card mx-auto mb-9 w-fit rounded-2xl px-10 py-7">
             <div className="font-mono text-[13px] tracking-wide text-text-dim uppercase">Precio</div>
-            <div className="font-display my-1.5 text-[44px] text-navy">
+            <div className="font-display my-1.5 text-[44px] text-white">
               Gs. {SUSCRIPCION.PRECIO_MENSUAL.toLocaleString("es-PY")}
               <span className="text-[16px] font-normal text-text-dim"> /mes</span>
             </div>
@@ -62,7 +65,7 @@ export default function SuscripcionPage() {
               href={linkTelegramSuscripcion()}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-[3px] bg-orange px-8 py-4.5 text-[16px] font-bold text-white transition-all hover:gap-3 hover:bg-orange-2"
+              className="btn-glow"
             >
               Suscribirme por Telegram →
             </a>
@@ -89,7 +92,7 @@ export default function SuscripcionPage() {
 
       <section className="py-18">
         <div className="mx-auto max-w-3xl px-8">
-          <h2 className="font-display mb-8 text-[26px] text-navy">Preguntas frecuentes</h2>
+          <h2 className="font-display mb-8 text-[26px] text-white">Preguntas frecuentes</h2>
           <div className="flex flex-col gap-6">
             <Faq pregunta="¿Cómo pago la suscripción?">
               Por ahora el pago es por transferencia bancaria manual, coordinada por Telegram — igual que la
@@ -133,7 +136,7 @@ export default function SuscripcionPage() {
           </p>
         </div>
       </footer>
-    </>
+    </PaginaOscura>
   );
 }
 

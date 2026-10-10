@@ -1,18 +1,14 @@
-import { Logo } from "@/components/Logo";
+import { NavOscuroSimple, PaginaOscura } from "@/components/PaginaOscura";
 import { CuentaConfirmadaMessage } from "@/components/auth/CuentaConfirmadaMessage";
 
 export default function CuentaConfirmadaPage() {
   return (
-    <>
-      <nav className="border-b border-line">
-        <div className="mx-auto flex h-19 max-w-6xl items-center px-8">
-          <Logo />
-        </div>
-      </nav>
+    <PaginaOscura>
+      <NavOscuroSimple />
 
-      <div className="flex min-h-[calc(100vh-77px)] items-center justify-center px-6 py-14">
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-6 py-14">
         <CuentaConfirmadaMessage />
       </div>
-    </>
+    </PaginaOscura>
   );
 }
