@@ -562,3 +562,11 @@ body {
   border-color: rgba(255, 255, 255, 0.3);
   background-color: rgba(255, 255, 255, 0.02);
 }
+
+.theme-legacy .from-navy {
+  --tw-gradient-from: #0a3e68;
+}
+
+.theme-legacy .to-navy-2 {
+  --tw-gradient-to: #0e4f86;
+}

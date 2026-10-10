@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/PublicNav";
+import { PaginaOscura } from "@/components/PaginaOscura";
 import { HexIcon } from "@/components/HexIcon";
 import { DownloadButton } from "@/components/catalog/DownloadButton";
 import { codigoDeDiseno } from "@/lib/codigo";
@@ -51,18 +52,20 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
       : null;
 
   return (
-    <>
-      <PublicNav />
+    <PaginaOscura>
+      <div className="px-[clamp(12px,3vw,24px)] pt-4">
+        <PublicNav variante="oscuro" />
+      </div>
 
-      <div className="mx-auto max-w-6xl px-8 pt-5.5 text-sm text-text-dim">
-        <Link href="/#catalogo" className="hover:text-navy">
+      <div className="mx-auto max-w-6xl px-8 pt-8 text-sm text-text-dim">
+        <Link href="/#catalogo" className="hover:text-white">
           Catálogo
         </Link>{" "}
-        / <span className="text-navy">{diseno.deporte}</span>
+        / <span className="text-white">{diseno.deporte}</span>
       </div>
 
       <section className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-14 px-8 py-9 md:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-lg border border-line bg-white p-8 shadow-[0_20px_40px_rgba(0,47,89,0.06)]">
+        <div className="glass-card rounded-2xl p-8">
           <div className="relative flex h-90 items-center justify-center overflow-hidden rounded-md border border-dashed border-line-strong bg-paper">
             {diseno.imagen_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -84,7 +87,7 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
               {diseno.es_gratis ? "Gratis" : "PRO"}
             </span>
           </div>
-          <h1 className="font-display mb-2.5 text-[32px] leading-tight text-navy">{diseno.nombre}</h1>
+          <h1 className="font-display mb-2.5 text-[length:clamp(30px,3.4vw,40px)] leading-tight font-semibold tracking-[-.02em] text-white">{diseno.nombre}</h1>
           <div className="mb-6.5 text-[13px] text-text-dim">
             {codigo} ·{" "}
             {diseno.es_oficial ? (
@@ -107,10 +110,10 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
             <SpecCell label="Incluye" value={diseno.formato} />
           </div>
 
-          <div className="mb-7 rounded-lg border-1.5 border-line-strong bg-white p-6">
+          <div className="glass-card mb-7 rounded-2xl p-6">
             <div className="mb-4.5 flex items-center justify-between">
               <span className="text-[13px] text-text-dim">Precio</span>
-              <span className="font-mono text-2xl font-bold text-navy">
+              <span className="font-mono text-2xl font-bold text-white">
                 {diseno.es_gratis ? "Gratis" : `Gs. ${diseno.precio.toLocaleString("es-PY")}`}
               </span>
             </div>
@@ -128,12 +131,12 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
           </div>
 
           <div>
-            <h3 className="mb-2.5 text-[15px] text-navy">Descripción</h3>
+            <h3 className="mb-2.5 text-[15px] text-white">Descripción</h3>
             <p className="mb-5 text-sm leading-relaxed text-text-dim">
               Kit completo listo para sublimación. Incluye guía de colores y capas separadas para ajustar
               sponsors o números.
             </p>
-            <h3 className="mb-2.5 text-[15px] text-navy">Este archivo incluye</h3>
+            <h3 className="mb-2.5 text-[15px] text-white">Este archivo incluye</h3>
             <ul className="flex flex-col gap-2">
               {diseno.formato.split("+").map((f) => (
                 <li key={f} className="flex items-center gap-2.5 text-[13px] text-ink before:h-1.25 before:w-1.25 before:bg-orange">
@@ -168,7 +171,7 @@ export default async function ProductoPage(props: PageProps<"/producto/[id]">) {
           </p>
         </div>
       </footer>
-    </>
+    </PaginaOscura>
   );
 }
 
@@ -176,7 +179,7 @@ function SpecCell({ label, value, mono }: { label: string; value: string; mono?:
   return (
     <div className="bg-white px-4 py-3.5">
       <div className="mb-1 text-[10px] tracking-wide text-text-dim uppercase">{label}</div>
-      <div className={`text-sm font-semibold text-navy ${mono ? "font-mono" : ""}`}>{value}</div>
+      <div className={`text-sm font-semibold text-white ${mono ? "font-mono" : ""}`}>{value}</div>
     </div>
   );
 }

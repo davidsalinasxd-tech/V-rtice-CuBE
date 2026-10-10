@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/PublicNav";
+import { PaginaOscura } from "@/components/PaginaOscura";
+import { ScrollReveal } from "@/components/hero/ScrollReveal";
 import { CatalogSection } from "@/components/catalog/CatalogSection";
 import { VendorBadge } from "@/components/VendorBadge";
 import { getPerfilVendedorPublico, getVendedorDestacadoDelMes } from "@/lib/supabase/queries";
@@ -54,8 +56,11 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
   const progreso = esPropio ? proximoNivel(perfil.descargasTotales) : null;
 
   return (
-    <>
-      <PublicNav />
+    <PaginaOscura>
+      <ScrollReveal />
+      <div className="px-[clamp(12px,3vw,24px)] pt-4">
+        <PublicNav variante="oscuro" />
+      </div>
 
       <section className="border-b border-line py-16">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-8 text-center">
@@ -66,16 +71,16 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
           )}
           <VendorBadge nivel={nivel} size="lg" />
           <div>
-            <h1 className="font-display text-[30px] text-navy">{perfil.nombre}</h1>
+            <h1 className="font-display text-[30px] font-semibold text-white">{perfil.nombre}</h1>
             <p className="mt-1 text-[13px] text-text-dim">Vendedor desde {formatMesAno(perfil.creadoEn)}</p>
           </div>
           <div className="flex gap-10">
             <div className="text-center">
-              <div className="font-display text-2xl text-navy">{perfil.disenosPublicados}</div>
+              <div className="font-display text-2xl text-white">{perfil.disenosPublicados}</div>
               <div className="font-mono text-[10px] tracking-widest text-text-dim uppercase">Diseños</div>
             </div>
             <div className="text-center">
-              <div className="font-display text-2xl text-navy">{perfil.descargasTotales}</div>
+              <div className="font-display text-2xl text-white">{perfil.descargasTotales}</div>
               <div className="font-mono text-[10px] tracking-widest text-text-dim uppercase">Descargas</div>
             </div>
           </div>
@@ -119,6 +124,7 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
             </>
           }
           subtitulo={`${perfil.disenosPublicados} diseño${perfil.disenosPublicados === 1 ? "" : "s"} publicados en Vértice Cube.`}
+          variante="oscuro"
         />
       )}
 
@@ -137,6 +143,6 @@ export default async function PerfilVendedorPage(props: { params: Promise<{ id: 
           </div>
         </div>
       </footer>
-    </>
+    </PaginaOscura>
   );
 }
