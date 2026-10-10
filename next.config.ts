@@ -18,13 +18,14 @@ const origenPublicoR2 = origenDe(process.env.R2_PUBLIC_URL);
 // El resto (orígenes, frames, formularios, objetos) sí queda cerrado.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${esProduccion ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${esProduccion ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com${origenPublicoR2 ? ` ${origenPublicoR2}` : ""}`,
   "font-src 'self' data:",
   // Supabase (auth/REST) y R2 (subida directa con URL firmada, desde el navegador).
-  `connect-src 'self' https://*.supabase.co https://*.r2.cloudflarestorage.com${esProduccion ? "" : " ws: wss:"}`,
-  "frame-src 'none'",
+  `connect-src 'self' https://*.supabase.co https://*.r2.cloudflarestorage.com https://challenges.cloudflare.com${esProduccion ? "" : " ws: wss:"}`,
+  // Solo el widget de Turnstile (captcha) puede mostrarse embebido.
+  "frame-src https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

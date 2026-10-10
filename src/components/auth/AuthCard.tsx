@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ensurePerfil } from "@/lib/supabase/perfil";
 import type { Rol } from "@/lib/types/database";
+import { TURNSTILE_SITE_KEY, Turnstile } from "./Turnstile";
 
 export function AuthCard() {
   const [tab, setTab] = useState<"crear" | "entrar">("crear");
@@ -16,8 +17,21 @@ export function AuthCard() {
   const [reenviado, setReenviado] = useState(false);
   const [recuperar, setRecuperar] = useState(false);
   const [resetEnviado, setResetEnviado] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const router = useRouter();
   const supabase = createClient();
+
+  // Sin clave de Turnstile el captcha está apagado y no se pide nada.
+  const captchaListo = !TURNSTILE_SITE_KEY || !!captchaToken;
+
+  /** Cada token sirve una sola vez: tras usarlo se descarta y el widget pide otro. */
+  function gastarCaptcha() {
+    const token = captchaToken ?? undefined;
+    setCaptchaToken(null);
+    setCaptchaKey((k) => k + 1);
+    return token;
+  }
 
   async function handleCrearCuenta(formData: FormData) {
     setLoading(true);
@@ -30,7 +44,11 @@ export function AuthCard() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { nombre, rol }, emailRedirectTo: `${window.location.origin}/cuenta-confirmada` },
+      options: {
+        data: { nombre, rol },
+        emailRedirectTo: `${window.location.origin}/cuenta-confirmada`,
+        captchaToken: gastarCaptcha(),
+      },
     });
 
     if (error) {
@@ -59,7 +77,11 @@ export function AuthCard() {
     const email = String(formData.get("email2") ?? "");
     const password = String(formData.get("pass2") ?? "");
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken: gastarCaptcha() },
+    });
 
     if (error) {
       if (error.message.toLowerCase().includes("email not confirmed")) {
@@ -87,7 +109,7 @@ export function AuthCard() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email: emailPendiente,
-      options: { emailRedirectTo: `${window.location.origin}/cuenta-confirmada` },
+      options: { emailRedirectTo: `${window.location.origin}/cuenta-confirmada`, captchaToken: gastarCaptcha() },
     });
     setLoading(false);
     if (error) {
@@ -104,6 +126,7 @@ export function AuthCard() {
     const email = String(formData.get("email3") ?? "");
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/restablecer-contrasena`,
+      captchaToken: gastarCaptcha(),
     });
 
     setLoading(false);
@@ -154,9 +177,11 @@ export function AuthCard() {
 
           <Field label="Correo electrónico" name="email3" type="email" placeholder="nombre@correo.com" required />
 
+          <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaListo}
             className="w-full cursor-pointer rounded-[3px] bg-orange py-3.5 text-sm font-bold text-white transition-colors hover:bg-orange-2 disabled:opacity-60"
           >
             {loading ? "Enviando…" : "Enviar link →"}
@@ -194,13 +219,16 @@ export function AuthCard() {
         {reenviado ? (
           <p className="text-[13px] text-navy-2">Te reenviamos el correo.</p>
         ) : (
-          <button
+          <>
+            <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+            <button
             onClick={handleReenviar}
-            disabled={loading}
+            disabled={loading || !captchaListo}
             className="cursor-pointer text-[13px] font-semibold text-navy-2 hover:text-orange disabled:opacity-60"
           >
             {loading ? "Reenviando…" : "¿No te llegó? Reenviar correo"}
           </button>
+          </>
         )}
 
         <button
@@ -283,9 +311,11 @@ export function AuthCard() {
             Acepto los Términos de uso y la Política de privacidad de VÉRTICE CUBE
           </label>
 
+          <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaListo}
             className="w-full cursor-pointer rounded-[3px] bg-orange py-3.5 text-sm font-bold text-white transition-colors hover:bg-orange-2 disabled:opacity-60"
           >
             {loading ? "Creando cuenta…" : "Crear cuenta →"}
@@ -313,9 +343,11 @@ export function AuthCard() {
             ¿Olvidaste tu contraseña?
           </button>
 
+          <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaListo}
             className="w-full cursor-pointer rounded-[3px] bg-orange py-3.5 text-sm font-bold text-white transition-colors hover:bg-orange-2 disabled:opacity-60"
           >
             {loading ? "Ingresando…" : "Iniciar sesión →"}
