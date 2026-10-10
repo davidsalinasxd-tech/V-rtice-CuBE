@@ -127,6 +127,10 @@ export type Database = {
         Relationships: []
       }
     }
-    Functions: Record<string, never>
+    Functions: {
+      descargas_pagables_de_vendedor: { Args: { p_vendedor: string }; Returns: number }
+      diseno_mas_descargado: { Args: Record<string, never>; Returns: string | null }
+      vendedor_destacado: { Args: { p_inicio: string; p_fin: string }; Returns: string | null }
+    }
   }
 }

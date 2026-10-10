@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Logo } from "@/components/Logo";
+import { NavOscuroSimple, PaginaOscura } from "@/components/PaginaOscura";
 import { RevisionCard } from "@/components/admin/RevisionCard";
 import { SuscripcionesPanel } from "@/components/admin/SuscripcionesPanel";
 import { DescargasMensualesPanel } from "@/components/admin/DescargasMensualesPanel";
@@ -133,15 +133,12 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const solicitudesPago = tab === "solicitudes" ? await getSolicitudesPagoPendientes() : [];
 
   return (
-    <>
-      <nav className="border-b border-line bg-white">
-        <div className="mx-auto flex h-19 max-w-6xl items-center justify-between px-8">
-          <Logo />
-          <Link href="/" className="text-sm text-text-dim hover:text-navy">
-            Volver a la tienda
-          </Link>
-        </div>
-      </nav>
+    <PaginaOscura>
+      <NavOscuroSimple>
+        <Link href="/" className="text-sm font-medium text-[#b5c3d4] transition-colors hover:text-white">
+          Volver a la tienda
+        </Link>
+      </NavOscuroSimple>
 
       <div className="mx-auto max-w-6xl px-8 py-9 pb-20">
         <div className="mb-8 flex w-fit gap-0.5 rounded-[3px] border border-line-strong bg-paper p-0.5">
@@ -246,6 +243,6 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           </>
         )}
       </div>
-    </>
+    </PaginaOscura>
   );
 }

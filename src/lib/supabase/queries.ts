@@ -25,22 +25,17 @@ export async function getPerfilVendedorPublico(id: string): Promise<PerfilVended
 
   const disenoIds = (disenos ?? []).map((d) => d.id);
 
-  let descargasTotales = 0;
-  if (disenoIds.length > 0) {
-    const { count } = await supabase
-      .from("descargas")
-      .select("id", { count: "exact", head: true })
-      .in("diseno_id", disenoIds)
-      .eq("cuenta_para_pago", true);
-    descargasTotales = count ?? 0;
-  }
+  const { data: descargasTotales, error: descargasError } = await supabase.rpc("descargas_pagables_de_vendedor", {
+    p_vendedor: id,
+  });
+  if (descargasError) console.error("Error al contar descargas del vendedor:", descargasError.message);
 
   return {
     id: perfil.id,
     nombre: perfil.nombre,
     creadoEn: perfil.created_at,
     disenosPublicados: disenoIds.length,
-    descargasTotales,
+    descargasTotales: descargasTotales ?? 0,
   };
 }
 
@@ -49,26 +44,12 @@ async function vendedorConMasDescargas(
   inicio: Date,
   fin: Date
 ): Promise<string | null> {
-  const { data } = await supabase
-    .from("descargas")
-    .select("disenos!inner(vendedor_id, es_oficial)")
-    .eq("cuenta_para_pago", true)
-    .gte("created_at", inicio.toISOString())
-    .lt("created_at", fin.toISOString());
-
-  if (!data || data.length === 0) return null;
-
-  const conteos = new Map<string, number>();
-  for (const fila of data as unknown as Array<{
-    disenos: { vendedor_id: string; es_oficial: boolean } | { vendedor_id: string; es_oficial: boolean }[];
-  }>) {
-    const rel = Array.isArray(fila.disenos) ? fila.disenos[0] : fila.disenos;
-    if (!rel || rel.es_oficial) continue;
-    conteos.set(rel.vendedor_id, (conteos.get(rel.vendedor_id) ?? 0) + 1);
-  }
-
-  if (conteos.size === 0) return null;
-  return [...conteos.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  const { data, error } = await supabase.rpc("vendedor_destacado", {
+    p_inicio: inicio.toISOString(),
+    p_fin: fin.toISOString(),
+  });
+  if (error) console.error("Error al buscar el vendedor destacado:", error.message);
+  return data ?? null;
 }
 
 /**
@@ -140,19 +121,9 @@ export async function getDisenoPublicadoPorId(id: string): Promise<Diseno | null
 /** Diseño publicado con más descargas registradas en la tabla `descargas`. */
 export async function getDisenoMasDescargado(): Promise<Diseno | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("descargas").select("diseno_id");
+  const { data: topId, error } = await supabase.rpc("diseno_mas_descargado");
 
-  if (error || !data || data.length === 0) {
-    if (error) console.error("Error al leer descargas:", error.message);
-    return null;
-  }
-
-  const conteos = new Map<string, number>();
-  for (const { diseno_id } of data) {
-    conteos.set(diseno_id, (conteos.get(diseno_id) ?? 0) + 1);
-  }
-
-  const [topId] = [...conteos.entries()].sort((a, b) => b[1] - a[1])[0] ?? [];
+  if (error) console.error("Error al leer el diseño más descargado:", error.message);
   return topId ? getDisenoPublicadoPorId(topId) : null;
 }
 
