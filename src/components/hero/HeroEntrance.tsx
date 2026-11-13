@@ -22,7 +22,6 @@ const linea: Keyframe[] = [
 const PLAN: Record<string, Paso> = {
   nav: { keyframes: subir(-12), delay: 0, duration: 700 },
   bar: { keyframes: subir(-8), delay: 140, duration: 700 },
-  eyebrow: { keyframes: subir(10), delay: 300, duration: 700 },
   l1: { keyframes: linea, delay: 380, duration: 900 },
   l2: { keyframes: linea, delay: 500, duration: 900 },
   lead: { keyframes: subir(14), delay: 720, duration: 800 },

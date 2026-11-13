@@ -64,12 +64,6 @@ export default async function Home() {
 
         <div className="relative z-3 mx-auto grid max-w-6xl grid-cols-1 items-center gap-[clamp(40px,5vw,56px)] px-[clamp(20px,3vw,32px)] pt-[clamp(48px,7vw,96px)] pb-[clamp(72px,9vw,120px)] md:grid-cols-[1.15fr_0.85fr]">
           <div>
-            <span
-              data-enter="eyebrow"
-              className="mb-5 block font-mono text-xs font-bold tracking-[.14em] text-orange-2 uppercase"
-            >
-              Archivos listos para sublimación · .RAR
-            </span>
             <h1 className="font-display mb-6 text-[length:clamp(46px,6.2vw,80px)] leading-[1.02] font-semibold tracking-[-.025em] text-white">
               <span data-enter="l1" className="block">
                 Diseños que
